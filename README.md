@@ -1,7 +1,7 @@
 <br/>
 <p align="center">
   <a href="https://github.com/KitsuneYokai/KitsuDeckDash">
-    <img src="assets/images/app_icon.png" alt="Logo" width="80" height="80">
+    <img src="assets/images/app_icon.png" alt="Logo" width="110" height="110">
   </a>
 
   <h3 align="center">KitsuDeckDash</h3>
