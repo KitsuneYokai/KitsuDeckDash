@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:window_manager/window_manager.dart';
 
-import 'sites/ui.dart';
+import 'sites/home/home.dart';
 import 'sites/settings/settings_controller.dart';
 import 'sites/settings/settings_view.dart';
 
@@ -46,7 +45,32 @@ class _MyAppState extends State<MyApp> {
               secondary: Colors.pink,
             ),
           ),
-          darkTheme: ThemeData.dark(),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Colors.blueGrey[700], // adjust to your liking
+            scaffoldBackgroundColor: Colors.grey[800],
+            // adjust to your liking
+            textTheme: const TextTheme(
+              bodyText1: TextStyle(
+                color: Colors.white,
+              ),
+              bodyText2: TextStyle(
+                color: Colors.white,
+              ),
+              subtitle1: TextStyle(
+                color: Colors.white,
+              ),
+              subtitle2: TextStyle(
+                color: Colors.white,
+              ),
+              headline6: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            colorScheme:
+                const ColorScheme.dark().copyWith(secondary: Colors.pink),
+          ),
           themeMode: widget.settingsController.themeMode,
           onGenerateRoute: (RouteSettings routeSettings) {
             return MaterialPageRoute<void>(
@@ -55,10 +79,10 @@ class _MyAppState extends State<MyApp> {
                 switch (routeSettings.name) {
                   case SettingsView.routeName:
                     return SettingsView(controller: widget.settingsController);
-                  case SampleItemListView.routeName:
-                    return SampleItemListView();
+                  case Home.routeName:
+                    return const Home();
                   default:
-                    return SampleItemListView();
+                    return const Home();
                 }
               },
             );

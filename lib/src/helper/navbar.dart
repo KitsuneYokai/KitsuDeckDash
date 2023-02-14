@@ -19,7 +19,7 @@ class _Navbar extends StatefulWidget {
 }
 
 class NavbarFinal extends State<_Navbar> {
-  double width = 200;
+  double width = 230;
   bool closed = false;
 
   @override
@@ -33,12 +33,13 @@ class NavbarFinal extends State<_Navbar> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).primaryColor,
-              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).primaryColor.withOpacity(0.9),
+              Theme.of(context).colorScheme.secondary.withOpacity(0.9),
             ],
           ),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               //set the height of the window buttons
@@ -50,7 +51,10 @@ class NavbarFinal extends State<_Navbar> {
               ListTile(
                 title: const Text(
                   "KitsuDeckDash",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
                 ),
                 leading: const Icon(
                   Icons.menu,
@@ -61,7 +65,7 @@ class NavbarFinal extends State<_Navbar> {
                     closed = !closed;
                   });
                   setState(() {
-                    width = width == 60 ? 200 : 60;
+                    width = width == 60 ? 230 : 60;
                   });
                 },
               ),
@@ -76,7 +80,7 @@ class NavbarFinal extends State<_Navbar> {
                     closed = !closed;
                   });
                   setState(() {
-                    width = width == 60 ? 200 : 60;
+                    width = width == 60 ? 230 : 60;
                   });
                 },
               ),
@@ -93,28 +97,29 @@ class NavbarFinal extends State<_Navbar> {
                     onTap: () {},
                     leading: const Icon(Icons.home, color: Colors.white),
                     //add a hover color to the list tile
-                    hoverColor: Colors.white,
+                    hoverColor: Theme.of(context).splashColor,
                   ),
                   ListTile(
                     title: const Text(
-                      "Devices",
+                      "Device",
                       style: TextStyle(color: Colors.white),
                     ),
                     onTap: () {},
                     // add a icon to the list tile
                     leading: const Icon(Icons.devices, color: Colors.white),
+                    hoverColor: Theme.of(context).splashColor,
                   ),
                 ] else ...[
                   ListTile(
                     onTap: () {},
                     leading: const Icon(Icons.home, color: Colors.white),
                     //add a hover color to the list tile
-                    hoverColor: Colors.white,
+                    hoverColor: Theme.of(context).splashColor,
                   ),
                   ListTile(
                     onTap: () {},
-                    // add a icon to the list tile
                     leading: const Icon(Icons.devices, color: Colors.white),
+                    hoverColor: Theme.of(context).splashColor,
                   ),
                 ]
               ],
@@ -157,19 +162,19 @@ class WindowButtons extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-            child: SizedBox(
-          height: 40,
-          child: DragToMoveArea(child: Container(color: Colors.transparent)),
-        )),
-        IconButton(
-            onPressed: () async {
-              await windowManager.minimize();
-            },
-            icon: const Icon(Icons.close))
-      ],
+    return Container(
+      // background color of the row
+      color: Theme.of(context).splashColor,
+      child: Row(
+        children: [
+          IconButton(
+              // background color of the button
+              onPressed: () async {
+                await windowManager.minimize();
+              },
+              icon: const Icon(Icons.close))
+        ],
+      ),
     );
   }
 }

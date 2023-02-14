@@ -25,28 +25,27 @@ String getImagePath(String imageName) {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // initialize the system tray
-  final AppWindow _appWindow = AppWindow();
-  final SystemTray _systemTray = SystemTray();
-  final Menu _menuMain = Menu();
-  final Menu _menuSimple = Menu();
+  final AppWindow appWindow = AppWindow();
+  final SystemTray systemTray = SystemTray();
+  final Menu menuMain = Menu();
 
   Future<void> initSystemTray() async {
     // We first init the systray menu and then add the menu entries
-    await _systemTray.initSystemTray(iconPath: getTrayImagePath('app_icon'));
-    _systemTray.setTitle("DeckDash");
-    _systemTray.setToolTip("Dashboard for the KitsuDeck");
+    await systemTray.initSystemTray(iconPath: getTrayImagePath('app_icon'));
+    systemTray.setTitle("DeckDash");
+    systemTray.setToolTip("Dashboard for the KitsuDeck");
 
     // handle system tray event
-    _systemTray.registerSystemTrayEventHandler((eventName) {
+    systemTray.registerSystemTrayEventHandler((eventName) {
       debugPrint("eventName: $eventName");
       if (eventName == kSystemTrayEventClick) {
-        Platform.isWindows ? _appWindow.show() : _systemTray.popUpContextMenu();
+        Platform.isWindows ? appWindow.show() : systemTray.popUpContextMenu();
       } else if (eventName == kSystemTrayEventRightClick) {
-        Platform.isWindows ? _systemTray.popUpContextMenu() : _appWindow.show();
+        Platform.isWindows ? systemTray.popUpContextMenu() : appWindow.show();
       }
     });
 
-    await _menuMain.buildFrom(
+    await menuMain.buildFrom(
       [
         MenuItemLabel(
             label: 'Open',
@@ -67,7 +66,7 @@ void main() async {
             }),
       ],
     );
-    _systemTray.setContextMenu(_menuMain);
+    systemTray.setContextMenu(menuMain);
   }
 
   await initSystemTray();

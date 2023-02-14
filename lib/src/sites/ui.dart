@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:flutter/services.dart';
 
-import '../sites/home/home.dart';
 import '../helper/navbar.dart';
 
 /// Displays a list of SampleItems.
-class SampleItemListView extends StatefulWidget {
-  static const routeName = '/';
-
-  SampleItemListView({Key? key}) : super(key: key);
+class MainView extends StatefulWidget {
+  final Widget child;
+  MainView({Key? key, required this.child}) : super(key: key);
 
   @override
   _SampleItemListViewState createState() => _SampleItemListViewState();
 }
 
-class _SampleItemListViewState extends State<SampleItemListView>
-    with WindowListener {
+class _SampleItemListViewState extends State<MainView> with WindowListener {
   @override
   void initState() {
     windowManager.addListener(this);
@@ -83,9 +79,33 @@ class _SampleItemListViewState extends State<SampleItemListView>
     return DragToResizeArea(
       child: Scaffold(
         body: Row(
-          children: const [
-            Navbar(),
-            Home(),
+          children: [
+            const Navbar(),
+            Expanded(
+              // background color of the row
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 40,
+                    child: Row(children: [
+                      const Spacer(),
+                      DragToMoveArea(
+                          child: Container(color: Colors.transparent)),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () async {
+                          await windowManager.hide();
+                        },
+                      )
+                    ]),
+                  ),
+                  Container(
+                    child: widget.child,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
