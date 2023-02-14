@@ -16,7 +16,7 @@
   </p>
 </p>
 
-![License](https://img.shields.io/github/license/KitsuneYokai/KitsuDeckDashReadME-Generator)
+![License](https://img.shields.io/github/license/KitsuneYokai/KitsuDeckDash)
 
 ## Table Of Contents
 
