@@ -1,0 +1,1 @@
+i will add more localization files in the future, but for now, only english is available.
