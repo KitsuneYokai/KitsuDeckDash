@@ -48,7 +48,7 @@ class KitsuDeck extends StatelessWidget {
                         ),
                         // display a big icon with a device and a plus sign
                         IconButton(
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                           iconSize: 100,
                           color: Colors.white,
                           onPressed: () {
@@ -56,7 +56,7 @@ class KitsuDeck extends StatelessWidget {
                                 builder: (context) => const KitsuDeckAdd()));
                           },
                         ),
-                        Text("Add a KitsuDeck device",
+                        const Text("Add a KitsuDeck device",
                             style: TextStyle(color: Colors.white)),
                       ],
                     ),
