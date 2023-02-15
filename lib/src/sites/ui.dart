@@ -86,49 +86,53 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(
-                    height: 40,
-                    child: Row(children: [
-                      const Spacer(),
-                      DragToMoveArea(
-                          child: Container(color: Colors.transparent)),
-                      //minimize button
-                      IconButton(
-                          // background color of the button
+                  DragToMoveArea(
+                    child: SizedBox(
+                      height: 40,
+                      child: Row(children: [
+                        const Spacer(),
+
+                        //minimize button
+                        IconButton(
+                            // background color of the button
+                            onPressed: () async {
+                              await windowManager.hide();
+                            },
+                            icon: const Icon(Icons.minimize)),
+                        //Maximize button
+                        IconButton(
+                            // background color of the button
+                            onPressed: () async {
+                              // check if the window is maximized
+                              bool isMaximized =
+                                  await windowManager.isMaximized();
+                              if (isMaximized) {
+                                await windowManager
+                                    .setSize(const Size(1280, 720));
+                                await windowManager.center();
+                              } else {
+                                // if the window is not maximized, maximize it
+                                await windowManager.maximize();
+                              }
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.crop_square)),
+                        //close button
+                        IconButton(
+                          icon: const Icon(Icons.close),
                           onPressed: () async {
+                            // will just hide the program to the tray
                             await windowManager.hide();
                           },
-                          icon: const Icon(Icons.minimize)),
-                      //Maximize button
-                      IconButton(
-                          // background color of the button
-                          onPressed: () async {
-                            // check if the window is maximized
-                            bool isMaximized =
-                                await windowManager.isMaximized();
-                            if (isMaximized) {
-                              await windowManager.setSize(Size(1280, 720));
-                              await windowManager.center();
-                            } else {
-                              // if the window is not maximized, maximize it
-                              await windowManager.maximize();
-                            }
-                            setState(() {});
-                          },
-                          icon: const Icon(Icons.crop_square)),
-                      //close button
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () async {
-                          // will just hide the program to the tray
-                          await windowManager.hide();
-                        },
-                      )
-                    ]),
+                        )
+                      ]),
+                    ),
                   ),
                   Container(
+                      child: Padding(
+                    padding: const EdgeInsets.all(15.0),
                     child: widget.child,
-                  ),
+                  )),
                 ],
               ),
             ),

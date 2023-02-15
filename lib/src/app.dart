@@ -42,14 +42,13 @@ class _MyAppState extends State<MyApp> {
             //pagetransitiontheme
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {
-                // remove the default page transition
-                TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
-                TargetPlatform.linux: ZoomPageTransitionsBuilder(),
-                TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+                TargetPlatform.macOS: NoTransitionBuilder(),
+                TargetPlatform.linux: NoTransitionBuilder(),
+                TargetPlatform.windows: NoTransitionBuilder(),
               },
             ),
             primaryColor: Colors.orange,
-            scaffoldBackgroundColor: Colors.white,
+            scaffoldBackgroundColor: Colors.grey[300],
             colorScheme: const ColorScheme.light().copyWith(
               secondary: Colors.pink,
             ),

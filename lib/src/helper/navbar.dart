@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../sites/home/home.dart';
-import '../sites/device/device.dart';
+import '../sites/KitsuDeck/KitsuDeck.dart';
 import '../sites/settings/settings_view.dart';
 
 class Navbar extends StatelessWidget {
@@ -107,13 +107,13 @@ class NavbarFinal extends State<_Navbar> {
                   ),
                   ListTile(
                     title: const Text(
-                      "Device",
+                      "KitsuDeck",
                       style: TextStyle(color: Colors.white),
                     ),
                     onTap: () {
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
-                              builder: (context) => const Device()),
+                              builder: (context) => const KitsuDeck()),
                           (Route<dynamic> route) => false);
                     },
                     // add a icon to the list tile
@@ -135,7 +135,7 @@ class NavbarFinal extends State<_Navbar> {
                     onTap: () {
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
-                              builder: (context) => const Device()),
+                              builder: (context) => const KitsuDeck()),
                           (Route<dynamic> route) => false);
                     },
                     leading: const Icon(Icons.devices, color: Colors.white),
