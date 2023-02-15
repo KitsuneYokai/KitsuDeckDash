@@ -1,134 +1,50 @@
-name: Flutter CI
+name: Flutter Desktop Build
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build-and-release-linux:
-    runs-on: ubuntu-22.04
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        dart: [stable]
+        flutter: [stable]
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: "stable"
-          architecture: x64
-          flutter-version: "3.3.9"
-      - name: Install dependencies
-        run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-0 libgtk-3-dev libblkid1 liblzma5 appindicator3-0.1 libappindicator3-1 libappindicator3-dev
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Generate intermediates
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Enable linux build
-        run: flutter config --enable-linux-desktop
-      - name: Build artifacts
-        run: flutter build linux --release
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: "zip"
-          filename: KitsuDeckDash-${{github.ref_name}}-linux.zip
-          directory: build/linux/x64/release/bundle
-      - name: Linux Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: build/linux/x64/release/bundle/KitsuDeckDash-${{github.ref_name}}-linux.zip
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  build-and-release-windows:
-    runs-on: windows-latest
+      - name: Setup ${{ matrix.os }} dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y appindicator3-0.1 libappindicator3-dev
 
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
         with:
-          channel: "stable"
-          architecture: x64
-          flutter-version: "3.3.9"
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Generate intermediates
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Enable windows build
-        run: flutter config --enable-windows-desktop
-      - name: Build artifacts
-        run: flutter build windows --release
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: "zip"
-          filename: KitsuDeckDash-${{github.ref_name}}-windows.zip
-          directory: build/windows/runner/Release
-      - name: Windows Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: build/windows/runner/Release/KitsuDeckDash-${{github.ref_name}}-windows.zip
+          channel: ${{ matrix.dart }}
 
-  build-and-release-macos:
-    runs-on: macos-latest
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ matrix.flutter }}
 
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: "stable"
-          architecture: x64
-          flutter-version: "3.3.9"
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Generate intermediates
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Enable macOS build
-        run: flutter config --enable-macos-desktop
-      - name: Build artifacts
-        run: flutter build macos --release
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: "zip"
-          filename: KitsuDeckDash-${{github.ref_name}}-macos.zip
-          directory: build/macos/Build/Products/Release
-      - name: macOS Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: build/macos/Build/Products/Release/KitsuDeckDash-${{github.ref_name}}-macos.zip
+      - name: Build app for ${{ matrix.os }}
+        run: flutter build ${{ matrix.os == 'windows-latest' ? 'windows' : 'linux' }} --release
 
-  build-and-release-macos-arm:
-    runs-on: macos-latest
+      - name: Build macOS arm64 app
+        if: matrix.os == 'macos-latest'
+        run: flutter build macos --release --target-platform darwin-arm64
 
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v2
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
-          channel: "stable"
-          architecture: arm64
-          flutter-version: "3.3.9"
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Generate intermediates
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Enable macOS build
-        run: flutter config --enable-macos-desktop
-      - name: Build artifacts
-        run: flutter build macos --release
-      - name: Archive Release
-        uses: thedoctor0/zip-release@master
-        with:
-          type: "zip"
-          filename: KitsuDeckDash-${{github.ref_name}}-macos-arm.zip
-          directory: build/macos/Build/Products/Release
-      - name: macOS Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: build/macos/Build/Products/Release/KitsuDeckDash-${{github.ref_name}}-macos-arm.zip
+          name: flutter-desktop-app
+          path: |
+            build/${{ matrix.os == 'windows-latest' ? 'windows' : 'linux' }}/release/
+            build/macos/Build/Products/Release/
