@@ -1,47 +1,84 @@
 name: Flutter Desktop Build
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        dart: [stable]
-        flutter: [stable]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Setup ${{ matrix.os }} dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y appindicator3-0.1 libappindicator3-dev
-
-      - name: Install Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          channel: ${{ matrix.dart }}
-
       - name: Install Flutter
         uses: subosito/flutter-action@v1
         with:
-          flutter-version: ${{ matrix.flutter }}
-
-      - name: Build app for ${{ matrix.os }}
-        run: flutter build ${{ matrix.os == 'windows-latest' ? 'windows' : 'linux' }} --release
-
-      - name: Build macOS arm64 app
-        if: matrix.os == 'macos-latest'
-        run: flutter build macos --release --target-platform darwin-arm64
-
+          flutter-version: stable
+      - name: Build app for Windows
+        run: flutter build windows --release
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: flutter-desktop-app
-          path: |
-            build/${{ matrix.os == 'windows-latest' ? 'windows' : 'linux' }}/release/
-            build/macos/Build/Products/Release/
+          name: windows
+          path: build/windows/Release/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y appindicator3-0.1 libappindicator3-1
+          sudo apt-get install -y libappindicator3-dev
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          channel: stable
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: stable
+      - name: Build app for Linux
+        run: flutter build linux --release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux
+          path: build/linux/Release/
+
+  build-macos-x64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: stable
+      - name: Build app for macOS x64
+        run: flutter build macos --release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-x64
+          path: build/macos/Build/Products/Release/
+
+  build-macos-arm:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: stable
+      - name: Build app for macOS arm64
+        run: flutter build macos --release --target-platform darwin-arm64
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-arm
+          path: build/macos/Build/Products/Release/
