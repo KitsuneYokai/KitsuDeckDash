@@ -6,7 +6,9 @@ import '../helper/navbar.dart';
 /// Displays a list of SampleItems.
 class MainView extends StatefulWidget {
   final Widget child;
-  MainView({Key? key, required this.child}) : super(key: key);
+  final String title;
+  MainView({Key? key, required this.child, required this.title})
+      : super(key: key);
 
   @override
   _SampleItemListViewState createState() => _SampleItemListViewState();
@@ -78,6 +80,7 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
   Widget build(BuildContext context) {
     return DragToResizeArea(
       child: Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
         body: Row(
           children: [
             const Navbar(),
@@ -90,26 +93,27 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                     child: SizedBox(
                       height: 40,
                       child: Row(children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Text(widget.title,
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                        ),
                         const Spacer(),
-
                         //minimize button
                         IconButton(
-                            // background color of the button
                             onPressed: () async {
-                              await windowManager.hide();
+                              await windowManager.minimize();
                             },
                             icon: const Icon(Icons.minimize)),
                         //Maximize button
                         IconButton(
-                            // background color of the button
                             onPressed: () async {
                               // check if the window is maximized
                               bool isMaximized =
                                   await windowManager.isMaximized();
                               if (isMaximized) {
-                                await windowManager
-                                    .setSize(const Size(1280, 720));
-                                await windowManager.center();
+                                await windowManager.unmaximize();
                               } else {
                                 // if the window is not maximized, maximize it
                                 await windowManager.maximize();
@@ -123,6 +127,7 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                           onPressed: () async {
                             // will just hide the program to the tray
                             await windowManager.hide();
+                            await windowManager.setSkipTaskbar(true);
                           },
                         )
                       ]),

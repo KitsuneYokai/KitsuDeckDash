@@ -49,20 +49,26 @@ void main() async {
       [
         MenuItemLabel(
             label: 'Open',
-            onClicked: (menuItem) {
-              windowManager.show();
-              windowManager.focus();
+            onClicked: (menuItem) async {
+              var isTaskbar = await windowManager.isSkipTaskbar();
+              if (isTaskbar) {
+                await windowManager.setSkipTaskbar(false);
+              }
+              await windowManager.show();
+              await windowManager.focus();
             }),
         MenuItemLabel(
             label: 'Hide',
-            onClicked: (menuItem) {
-              windowManager.minimize();
+            onClicked: (menuItem) async {
+              var isTaskbar = await windowManager.isSkipTaskbar();
+              await windowManager.setSkipTaskbar(true);
+              await windowManager.minimize();
             }),
         MenuSeparator(),
         MenuItemLabel(
             label: 'Quit',
-            onClicked: (menuItem) {
-              windowManager.close();
+            onClicked: (menuItem) async {
+              await windowManager.close();
             }),
       ],
     );
@@ -92,7 +98,6 @@ void main() async {
     minimumSize: Size(480, 320),
     center: true,
     backgroundColor: Colors.transparent,
-    skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
