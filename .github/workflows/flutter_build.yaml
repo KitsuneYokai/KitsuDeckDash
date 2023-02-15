@@ -12,15 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Install Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: stable
       - name: Build app for Windows
         run: flutter build windows --release
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: windows
+          name: KitsuDeckDash-windows
           path: build/windows/Release/
 
   build-linux:
@@ -31,22 +31,21 @@ jobs:
       - name: Setup Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y appindicator3-0.1 libappindicator3-1
-          sudo apt-get install -y libappindicator3-dev
+          sudo apt-get install -y appindicator3-0.1 libappindicator3-dev
       - name: Install Dart
         uses: dart-lang/setup-dart@v1
         with:
           channel: stable
       - name: Install Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: stable
       - name: Build app for Linux
         run: flutter build linux --release
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: linux
+          name: KitsuDeckDash-linux
           path: build/linux/Release/
 
   build-macos-x64:
@@ -55,30 +54,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Install Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: stable
       - name: Build app for macOS x64
         run: flutter build macos --release
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: macos-x64
-          path: build/macos/Build/Products/Release/
-
-  build-macos-arm:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          flutter-version: stable
-      - name: Build app for macOS arm64
-        run: flutter build macos --release --target-platform darwin-arm64
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-arm
+          name: KitsuDeckDash-macos
           path: build/macos/Build/Products/Release/
