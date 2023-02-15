@@ -55,13 +55,13 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                 'This will close the app, and the connection to the KitsuDeck will be lost.\n\nIf you want to close the Dashboard, but keep the connection to the KitsuDeck, please use the "Minimize" button instead.'),
             actions: [
               TextButton(
-                child: Text('No'),
+                child: const Text('No'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: Text('Yes'),
+                child: const Text('Yes'),
                 onPressed: () async {
                   Navigator.of(context).pop();
                   await windowManager.destroy();
@@ -92,9 +92,35 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                       const Spacer(),
                       DragToMoveArea(
                           child: Container(color: Colors.transparent)),
+                      //minimize button
+                      IconButton(
+                          // background color of the button
+                          onPressed: () async {
+                            await windowManager.hide();
+                          },
+                          icon: const Icon(Icons.minimize)),
+                      //Maximize button
+                      IconButton(
+                          // background color of the button
+                          onPressed: () async {
+                            // check if the window is maximized
+                            bool isMaximized =
+                                await windowManager.isMaximized();
+                            if (isMaximized) {
+                              await windowManager.setSize(Size(1280, 720));
+                              await windowManager.center();
+                            } else {
+                              // if the window is not maximized, maximize it
+                              await windowManager.maximize();
+                            }
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.crop_square)),
+                      //close button
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () async {
+                          // will just hide the program to the tray
                           await windowManager.hide();
                         },
                       )

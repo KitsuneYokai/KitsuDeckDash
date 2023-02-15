@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../sites/home/home.dart';
+import '../sites/device/device.dart';
 import '../sites/settings/settings_view.dart';
 
 class Navbar extends StatelessWidget {
@@ -18,10 +20,10 @@ class _Navbar extends StatefulWidget {
   NavbarFinal createState() => NavbarFinal();
 }
 
-class NavbarFinal extends State<_Navbar> {
-  double width = 230;
-  bool closed = false;
+double width = 230;
+bool closed = false;
 
+class NavbarFinal extends State<_Navbar> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -94,7 +96,11 @@ class NavbarFinal extends State<_Navbar> {
                       "Home",
                       style: TextStyle(color: Colors.white),
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => const Home()),
+                          (Route<dynamic> route) => false);
+                    },
                     leading: const Icon(Icons.home, color: Colors.white),
                     //add a hover color to the list tile
                     hoverColor: Theme.of(context).splashColor,
@@ -104,20 +110,34 @@ class NavbarFinal extends State<_Navbar> {
                       "Device",
                       style: TextStyle(color: Colors.white),
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                              builder: (context) => const Device()),
+                          (Route<dynamic> route) => false);
+                    },
                     // add a icon to the list tile
                     leading: const Icon(Icons.devices, color: Colors.white),
                     hoverColor: Theme.of(context).splashColor,
                   ),
                 ] else ...[
                   ListTile(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => const Home()),
+                          (Route<dynamic> route) => false);
+                    },
                     leading: const Icon(Icons.home, color: Colors.white),
                     //add a hover color to the list tile
                     hoverColor: Theme.of(context).splashColor,
                   ),
                   ListTile(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                              builder: (context) => const Device()),
+                          (Route<dynamic> route) => false);
+                    },
                     leading: const Icon(Icons.devices, color: Colors.white),
                     hoverColor: Theme.of(context).splashColor,
                   ),
@@ -151,29 +171,6 @@ class NavbarFinal extends State<_Navbar> {
             ]
           ],
         ),
-      ),
-    );
-  }
-}
-
-class WindowButtons extends StatelessWidget {
-  const WindowButtons({
-    super.key,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // background color of the row
-      color: Theme.of(context).splashColor,
-      child: Row(
-        children: [
-          IconButton(
-              // background color of the button
-              onPressed: () async {
-                await windowManager.minimize();
-              },
-              icon: const Icon(Icons.close))
-        ],
       ),
     );
   }

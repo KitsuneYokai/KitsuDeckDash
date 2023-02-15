@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../ui.dart';
 
 import 'settings_controller.dart';
 
@@ -15,11 +16,8 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: Padding(
+    return MainView(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         // Glue the SettingsController to the theme selection DropdownButton.
         //

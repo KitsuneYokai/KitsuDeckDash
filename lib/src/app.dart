@@ -39,6 +39,15 @@ class _MyAppState extends State<MyApp> {
           onGenerateTitle: (BuildContext context) =>
               AppLocalizations.of(context)!.appTitle,
           theme: ThemeData(
+            //pagetransitiontheme
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                // remove the default page transition
+                TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+                TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+                TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+              },
+            ),
             primaryColor: Colors.orange,
             scaffoldBackgroundColor: Colors.white,
             colorScheme: const ColorScheme.light().copyWith(
@@ -46,6 +55,14 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           darkTheme: ThemeData(
+            // remove the default page transition
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.macOS: NoTransitionBuilder(),
+                TargetPlatform.linux: NoTransitionBuilder(),
+                TargetPlatform.windows: NoTransitionBuilder(),
+              },
+            ),
             brightness: Brightness.dark,
             primaryColor: Colors.blueGrey[700], // adjust to your liking
             scaffoldBackgroundColor: Colors.grey[800],
@@ -90,5 +107,20 @@ class _MyAppState extends State<MyApp> {
         );
       },
     );
+  }
+}
+
+class NoTransitionBuilder extends PageTransitionsBuilder {
+  const NoTransitionBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
   }
 }

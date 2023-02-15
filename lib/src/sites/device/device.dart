@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import '../ui.dart';
 
-class Home extends StatelessWidget {
-  static const routeName = '/';
+class Device extends StatelessWidget {
+  static const routeName = '/device';
 
-  const Home({
+  const Device({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return MainView(child: Text("Home"));
+    return MainView(child: Text("Device"));
   }
 }
