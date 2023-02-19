@@ -30,6 +30,7 @@ class _KitsuDeckAddState extends State<KitsuDeckAdd> {
   @override
   Widget build(BuildContext context) {
     return MainView(
+      canGoBack: true,
       title: "Add a KitsuDeck",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

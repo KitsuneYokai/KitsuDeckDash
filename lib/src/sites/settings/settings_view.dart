@@ -25,8 +25,8 @@ class SettingsView extends StatelessWidget {
           //
           // When a user selects a theme from the dropdown list, the
           // SettingsController is updated, which rebuilds the MaterialApp.
-          child: Expanded(
-              child: Column(
+
+          child: Column(
             children: [
               const Text("Theme:"),
               DropdownButton<ThemeMode>(
@@ -60,40 +60,78 @@ class SettingsView extends StatelessWidget {
                   },
                   child: const Text("Open Websocket viewer")),
             ],
-          )),
+          ),
         ));
   }
 }
 
 // websocket viewer
-class WebsocketView extends StatelessWidget {
-  WebsocketView({
-    super.key,
-  });
+class WebsocketView extends StatefulWidget {
+  const WebsocketView({key}) : super(key: key);
 
-  final channel = WebSocketChannel.connect(
-    Uri.parse('ws://192.168.178.23/ws'),
-  );
   static const routeName = '/websocket';
+
+  @override
+  _WebsocketViewState createState() => _WebsocketViewState();
+}
+
+class _WebsocketViewState extends State<WebsocketView> {
+  final TextEditingController _controller = TextEditingController();
+  final channel = WebSocketChannel.connect(Uri.parse('ws://192.168.178.23/ws'));
+
   @override
   Widget build(BuildContext context) {
-    return MainView(
-        title: "KitsuDeck websocket Viewer",
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Expanded(
-              child: Column(
-            children: [
-              const Text("Websocket Viewer"),
-              //create a button to test the tray icon
-              StreamBuilder(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Websocket Chat'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: StreamBuilder(
                 stream: channel.stream,
                 builder: (context, snapshot) {
-                  return Text(snapshot.hasData ? '${snapshot.data}' : '');
+                  if (snapshot.hasData) {
+                    return Text(snapshot.data);
+                  } else {
+                    return Text('Connecting...');
+                  }
                 },
-              )
-            ],
-          )),
-        ));
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(hintText: 'Enter message'),
+                    onSubmitted: (text) {
+                      channel.sink.add(text);
+                      _controller.clear();
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () {
+                    channel.sink.add(_controller.text);
+                    _controller.clear();
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    channel.sink.close();
+    super.dispose();
   }
 }

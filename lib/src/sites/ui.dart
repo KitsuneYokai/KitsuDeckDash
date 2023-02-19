@@ -7,7 +7,12 @@ import '../helper/navbar.dart';
 class MainView extends StatefulWidget {
   final Widget child;
   final String title;
-  MainView({Key? key, required this.child, required this.title})
+  bool canGoBack = false;
+  MainView(
+      {Key? key,
+      required this.child,
+      required this.title,
+      this.canGoBack = false})
       : super(key: key);
 
   @override
@@ -93,6 +98,14 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                     child: SizedBox(
                       height: 40,
                       child: Row(children: [
+                        if (widget.canGoBack)
+                          // create a icon button without animations
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
                         Padding(
                           padding: EdgeInsets.only(left: 10),
                           child: Text(widget.title,
