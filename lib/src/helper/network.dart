@@ -16,7 +16,7 @@ getCurrentIP() async {
   }
 }
 
-Future<List<String>> getKitsuDeckIP() async {
+Future<List<String>> getKitsuDeckHostname() async {
   final ipList = <String>[];
   final currentIP = await getCurrentIP();
   if (currentIP == null) {

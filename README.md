@@ -26,6 +26,7 @@
 - [Usage](#usage)
 - [License](#license)
 - [Authors](#authors)
+- [Thinks to note](#thinks-to-note)
 
 ## About The Project
 
@@ -51,3 +52,6 @@ Distributed under the MIT License. See [LICENSE](https://github.com/KitsuneYokai
 ## Authors
 
 * [KitsuneYokai](https://github.com/KitsuneYokai)
+
+## Thinks to note
+The program will look better in the futurem once i got everything working.

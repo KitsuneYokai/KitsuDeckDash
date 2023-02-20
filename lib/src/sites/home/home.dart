@@ -33,10 +33,11 @@ class Home extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(20),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Spacer(),
-                    Text("I have no idea what to display here at the moment."),
-                    Text("Maybe I will add a changelog here?")
+                    Text("Changelog:",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
                   ],
                 ),
               )),
