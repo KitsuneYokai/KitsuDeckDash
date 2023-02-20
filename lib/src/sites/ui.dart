@@ -107,9 +107,9 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                             },
                           ),
                         Padding(
-                          padding: EdgeInsets.only(left: 10),
+                          padding: const EdgeInsets.only(left: 10),
                           child: Text(widget.title,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold)),
                         ),
                         const Spacer(),
@@ -146,11 +146,10 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
                       ]),
                     ),
                   ),
-                  Container(
-                      child: Padding(
+                  Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: widget.child,
-                  )),
+                  ),
                 ],
               ),
             ),

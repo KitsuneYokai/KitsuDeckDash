@@ -1,8 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:kitsu_deck_dash/src/helper/navbar.dart';
+
+import '../../helper/settingsStorage.dart';
 import '../ui.dart';
+import 'KitsuDeck.dart';
 import '../../helper/network.dart';
 import '../../helper/apiRequests/kitsuDeck/kitsuDeck.dart';
 
@@ -128,10 +129,23 @@ class KitsuDeckAddDevice extends StatefulWidget {
 
 class KitsuDeckAddDeviceState extends State<KitsuDeckAddDevice> {
   bool isProtected = false;
+  SharedPref sharedPref = SharedPref();
 
   Future<void> initGetKitsuDeckIndex() async {
     try {
       final response = await getKitsuDeckIndex(widget.kitsuDeckHostname);
+      if (response["protected"] == false) {
+        final json = {
+          "hostname": widget.kitsuDeckHostname,
+          "username": usernameController.text,
+          "password": passwordController.text,
+        };
+        await sharedPref.save("kitsuDeck", json);
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (context) {
+          return const KitsuDeck();
+        }), (route) => false);
+      }
       setState(() {
         if (response["protected"]) {
           isProtected = true;
@@ -148,7 +162,6 @@ class KitsuDeckAddDeviceState extends State<KitsuDeckAddDevice> {
     initGetKitsuDeckIndex();
   }
 
-  // add the text controller to the text field
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   @override
@@ -158,80 +171,92 @@ class KitsuDeckAddDeviceState extends State<KitsuDeckAddDevice> {
       canGoBack: true,
       child: Column(
         children: [
-          if (isProtected)
+          if (isProtected) ...[
             const Text(
                 "This KitsuDeck is protected, please enter the username/password"),
-          // generate a container with a form to enter the username and password with a gradient background and a button
-          Container(
-            margin: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.secondary.withOpacity(0.9),
-                  Theme.of(context).primaryColor.withOpacity(0.9),
-                ],
+            // generate a container with a form to enter the username and password with a gradient background and a button
+            Container(
+              margin: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.secondary.withOpacity(0.9),
+                    Theme.of(context).primaryColor.withOpacity(0.9),
+                  ],
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const Text(
-                    "Enter your username and password",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: usernameController,
-                    decoration: const InputDecoration(
-                      labelText: "Username",
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Enter your username and password",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                      labelText: "Password",
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: usernameController,
+                      decoration: const InputDecoration(
+                        labelText: "Username",
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final auth = await postKitsuDeckAuth(
-                          widget.kitsuDeckHostname,
-                          usernameController.text,
-                          passwordController.text);
-                      if (jsonDecode(auth)["status"] == true) {
-                        // TODO: save the hostname of the device using flutter secure storage (i have yet to implement this) and then navigate to the KitsuDeck page
-                      }
-                    },
-                    child: const Text("Add"),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                        labelText: "Password",
+                        labelStyle: TextStyle(color: Colors.white),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final auth = await postKitsuDeckAuth(
+                            widget.kitsuDeckHostname,
+                            usernameController.text,
+                            passwordController.text);
+                        if (jsonDecode(auth)["status"] == true) {
+                          final json = {
+                            "hostname": widget.kitsuDeckHostname,
+                            "username": usernameController.text,
+                            "password": passwordController.text,
+                          };
+                          await sharedPref.save("kitsuDeck", json);
+                          Navigator.pushAndRemoveUntil(context,
+                              MaterialPageRoute(builder: (context) {
+                            return const KitsuDeck();
+                          }), (route) => false);
+                        }
+                      },
+                      child: const Text("Add"),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          )
+            )
+          ] else ...[
+            const CircularProgressIndicator()
+          ]
         ],
       ),
     );

@@ -60,9 +60,8 @@ void main() async {
         MenuItemLabel(
             label: 'Hide',
             onClicked: (menuItem) async {
-              var isTaskbar = await windowManager.isSkipTaskbar();
               await windowManager.setSkipTaskbar(true);
-              await windowManager.minimize();
+              await windowManager.hide();
             }),
         MenuSeparator(),
         MenuItemLabel(

@@ -29,7 +29,7 @@ Future<List<String>> getKitsuDeckHostname() async {
     final address = InternetAddress(ip);
     final lookup = address.reverse();
     futures.add(lookup.then((result) {
-      if (result != null && result.host.startsWith('kitsudeck-')) {
+      if (result.host.startsWith('kitsudeck-')) {
         ipList.add(result.host);
       }
     }).catchError((error) {

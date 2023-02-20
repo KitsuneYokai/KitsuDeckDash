@@ -1,4 +1,3 @@
-// import the libraries we need
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -9,6 +8,7 @@ getKitsuDeckIndex(kitsuDeckHostname) async {
     var jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   } else {
+    // print error message for now
     print('Request failed with status: ${response.statusCode}.');
   }
 }
@@ -25,6 +25,7 @@ postKitsuDeckAuth(kitsuDeckHostname, username, password) async {
   if (response.statusCode == 200) {
     return response.body;
   } else {
+    // print error message for now
     print('Request failed with status: ${response.statusCode}.');
   }
 }

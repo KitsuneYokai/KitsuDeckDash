@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../ui.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import '../../helper/settingsStorage.dart';
 
 import 'settings_controller.dart';
 
@@ -50,13 +51,20 @@ class SettingsView extends StatelessWidget {
                 ],
               ),
               const Text("Debug Stuff:"),
+
+              ElevatedButton(
+                  onPressed: () async {
+                    SharedPref sharedPref = SharedPref();
+                    print(await sharedPref.read("kitsuDeck"));
+                  },
+                  child: const Text("get_shared_preferences")),
               //create a button to test the tray icon
               ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WebsocketView()));
+                            builder: (context) => const WebsocketView()));
                   },
                   child: const Text("Open Websocket viewer")),
             ],
@@ -83,7 +91,7 @@ class _WebsocketViewState extends State<WebsocketView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Websocket Chat'),
+        title: const Text('Websocket Chat'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -97,7 +105,7 @@ class _WebsocketViewState extends State<WebsocketView> {
                   if (snapshot.hasData) {
                     return Text(snapshot.data);
                   } else {
-                    return Text('Connecting...');
+                    return const Text('Connecting...');
                   }
                 },
               ),
@@ -107,7 +115,8 @@ class _WebsocketViewState extends State<WebsocketView> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: InputDecoration(hintText: 'Enter message'),
+                    decoration:
+                        const InputDecoration(hintText: 'Enter message'),
                     onSubmitted: (text) {
                       channel.sink.add(text);
                       _controller.clear();
@@ -115,7 +124,7 @@ class _WebsocketViewState extends State<WebsocketView> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: () {
                     channel.sink.add(_controller.text);
                     _controller.clear();
