@@ -82,15 +82,14 @@ void main() async {
   // check if there is a KitsuDeck saved in the shared preferences
   SharedPref sharedPref = SharedPref();
   var kitsuDeck = await sharedPref.read("kitsuDeck");
-  print(kitsuDeck);
   if (kitsuDeck == null) {
   } else {
     // connect to the websocket
     final webSocketUrl = "ws://${jsonDecode(kitsuDeck)["hostname"]}/ws";
     WebSocketService webSocketService = WebSocketService(webSocketUrl);
     await webSocketService.connect();
-    print(await webSocketService.isWebSocketConnected());
   }
+
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
