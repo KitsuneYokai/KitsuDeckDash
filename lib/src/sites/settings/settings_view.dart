@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../ui.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../helper/settingsStorage.dart';
-
+import '../../helper/settingsStorage.dart';
+import '../../helper/websocket/ws.dart';
 import 'settings_controller.dart';
 
 /// Displays the various settings that can be customized by the user.
@@ -51,96 +51,27 @@ class SettingsView extends StatelessWidget {
                 ],
               ),
               const Text("Debug Stuff:"),
-
               ElevatedButton(
                   onPressed: () async {
                     SharedPref sharedPref = SharedPref();
                     print(await sharedPref.read("kitsuDeck"));
                   },
-                  child: const Text("get_shared_preferences")),
-              //create a button to test the tray icon
+                  child: const Text("print: get_shared_preferences")),
               ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const WebsocketView()));
+                  onPressed: () async {
+                    SharedPref sharedPref = SharedPref();
+                    await sharedPref.remove("kitsuDeck");
                   },
-                  child: const Text("Open Websocket viewer")),
+                  child: const Text("print: remove_shared_preferences")),
+              ElevatedButton(
+                  onPressed: () async {
+                    WebSocketService webSocketService = WebSocketService("");
+                    var isConnected = webSocketService.isWebSocketConnected();
+                    print(isConnected);
+                  },
+                  child: const Text("print: websocket_is_connected")),
             ],
           ),
         ));
-  }
-}
-
-// websocket viewer
-class WebsocketView extends StatefulWidget {
-  const WebsocketView({key}) : super(key: key);
-
-  static const routeName = '/websocket';
-
-  @override
-  _WebsocketViewState createState() => _WebsocketViewState();
-}
-
-class _WebsocketViewState extends State<WebsocketView> {
-  final TextEditingController _controller = TextEditingController();
-  final channel = WebSocketChannel.connect(Uri.parse('ws://192.168.178.23/ws'));
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Websocket Chat'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                stream: channel.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(snapshot.data);
-                  } else {
-                    return const Text('Connecting...');
-                  }
-                },
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration:
-                        const InputDecoration(hintText: 'Enter message'),
-                    onSubmitted: (text) {
-                      channel.sink.add(text);
-                      _controller.clear();
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    channel.sink.add(_controller.text);
-                    _controller.clear();
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    channel.sink.close();
-    super.dispose();
   }
 }

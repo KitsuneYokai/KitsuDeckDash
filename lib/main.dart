@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -9,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'src/app.dart';
 import 'src/sites/settings/settings_controller.dart';
 import 'src/sites/settings/settings_service.dart';
+import 'src/helper/settingsStorage.dart';
+import 'src/helper/websocket/ws.dart';
 
 String getTrayImagePath(String imageName) {
   return Platform.isWindows
@@ -76,6 +79,18 @@ void main() async {
 
   await initSystemTray();
 
+  // check if there is a KitsuDeck saved in the shared preferences
+  SharedPref sharedPref = SharedPref();
+  var kitsuDeck = await sharedPref.read("kitsuDeck");
+  print(kitsuDeck);
+  if (kitsuDeck == null) {
+  } else {
+    // connect to the websocket
+    final webSocketUrl = "ws://${jsonDecode(kitsuDeck)["hostname"]}/ws";
+    WebSocketService webSocketService = WebSocketService(webSocketUrl);
+    await webSocketService.connect();
+    print(await webSocketService.isWebSocketConnected());
+  }
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());

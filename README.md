@@ -54,4 +54,4 @@ Distributed under the MIT License. See [LICENSE](https://github.com/KitsuneYokai
 * [KitsuneYokai](https://github.com/KitsuneYokai)
 
 ## Thinks to note
-The program will look better in the futurem once i got everything working.
+The program will look better in the future once i got everything working
