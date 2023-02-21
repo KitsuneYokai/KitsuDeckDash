@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-import '../../helper/settingsStorage.dart';
-import '../ui.dart';
 import 'KitsuDeck.dart';
+import '../ui.dart';
 import '../../helper/network.dart';
 import '../../helper/apiRequests/kitsuDeck/kitsuDeck.dart';
+import '../../helper/settingsStorage.dart';
+import '../../helper/websocket/ws.dart';
 
 class KitsuDeckAdd extends StatefulWidget {
   static const routeName = '/device';
@@ -141,6 +142,10 @@ class KitsuDeckAddDeviceState extends State<KitsuDeckAddDevice> {
           "password": passwordController.text,
         };
         await sharedPref.save("kitsuDeck", json);
+        // connect to the websocket
+        final webSocketUrl = "ws://${widget.kitsuDeckHostname}/ws";
+        WebSocketService webSocketService = WebSocketService(webSocketUrl);
+        await webSocketService.connect();
         Navigator.pushAndRemoveUntil(context,
             MaterialPageRoute(builder: (context) {
           return const KitsuDeck();
@@ -242,6 +247,11 @@ class KitsuDeckAddDeviceState extends State<KitsuDeckAddDevice> {
                             "password": passwordController.text,
                           };
                           await sharedPref.save("kitsuDeck", json);
+                          final webSocketUrl =
+                              "ws://${widget.kitsuDeckHostname}/ws";
+                          WebSocketService webSocketService =
+                              WebSocketService(webSocketUrl);
+                          await webSocketService.connect();
                           Navigator.pushAndRemoveUntil(context,
                               MaterialPageRoute(builder: (context) {
                             return const KitsuDeck();
