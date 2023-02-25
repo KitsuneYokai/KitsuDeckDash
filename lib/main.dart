@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
-
 import 'package:flutter/material.dart';
 
 import 'src/app.dart';

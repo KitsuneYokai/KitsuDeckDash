@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:web_socket_channel/io.dart';
 
 bool _isConnected = false;

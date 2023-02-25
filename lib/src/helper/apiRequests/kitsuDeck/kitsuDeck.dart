@@ -26,6 +26,18 @@ postKitsuDeckAuth(kitsuDeckHostname, username, password) async {
     return response.body;
   } else {
     // print error message for now
-    print('Request failed with status: ${response.statusCode}.');
+    return false;
+  }
+}
+
+getKitsuDeckMakros(kitsuDeckHostname) async {
+  var response = await http
+      .get(Uri.parse('http://$kitsuDeckHostname/kitsuDeck/getMakros'));
+  if (response.statusCode == 200) {
+    var jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  } else {
+    // print error message for now
+    return false;
   }
 }
