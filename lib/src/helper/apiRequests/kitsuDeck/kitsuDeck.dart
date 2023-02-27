@@ -41,3 +41,40 @@ getKitsuDeckMakros(kitsuDeckHostname) async {
     return false;
   }
 }
+
+getKitsuDeckMakroImg(kitsuDeckHostname, makroId) async {
+  // set up POST request arguments
+  String url = 'http://$kitsuDeckHostname/kitsuDeck/getMacroImg';
+  Map<String, String> headers = {"Content-type": "application/json"};
+  String json = '{"id": "$makroId"}';
+  // make POST request
+  http.Response response =
+      await http.post(Uri.parse(url), headers: headers, body: json);
+  // check the status code for the result
+  if (response.statusCode == 200) {
+    return response.body;
+  } else {
+    // print error message for now
+    return false;
+  }
+}
+
+addKitsuDeckMacro(kitsuDeckHostname, macroName, macroImg, macroType, macroKeys,
+    macroDescription) async {
+  // set up POST request arguments
+  String url = 'http://$kitsuDeckHostname/kitsuDeck/addMakro';
+  Map<String, String> headers = {"Content-type": "application/json"};
+  String json =
+      '{"name": "$macroName", "key": $macroKeys, "description": "$macroDescription", "type": $macroType, "picture": "$macroImg"}';
+  print(json);
+  // make POST request
+  http.Response response =
+      await http.post(Uri.parse(url), headers: headers, body: json);
+  // check the status code for the result
+  if (response.statusCode == 200) {
+    return response.body;
+  } else {
+    // print error message for now
+    return false;
+  }
+}
