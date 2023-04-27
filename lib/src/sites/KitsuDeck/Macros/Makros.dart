@@ -137,9 +137,15 @@ class _KitsuDeckMakrosState extends State<KitsuDeckMakros> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Image.memory(
-                                  base64Decode(makros['picture']),
-                                ),
+                                if (makros['picture'] != null) ...[
+                                  Image.memory(
+                                    base64Decode(makros['picture']),
+                                    width: 100,
+                                    height: 100,
+                                  )
+                                ] else ...[
+                                  const Icon(Icons.image)
+                                ],
                                 Padding(
                                   padding: const EdgeInsets.only(left: 5),
                                   child: Column(

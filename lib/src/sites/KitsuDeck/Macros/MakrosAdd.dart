@@ -89,7 +89,7 @@ class _MacroAddBottomSheetState extends State<MacroAddBottomSheet> {
                       var response = await addKitsuDeckMacro(
                           widget.hostname,
                           nameController.text,
-                          // macbo image bytes as base64
+                          // macro image bytes as base64
                           macroImgBytes.isNotEmpty
                               ? base64Encode(macroImgBytes)
                               : base64Encode((await rootBundle
@@ -183,14 +183,14 @@ class _MacroAddBottomSheetState extends State<MacroAddBottomSheet> {
                                   if (file.lengthSync() > 64 * 64) {
                                     image = img.copyResize(image,
                                         width: 64, height: 64);
-                                    int quality = (2 *
-                                            1024 *
-                                            1024 /
-                                            file.lengthSync() *
-                                            100)
-                                        .toInt();
-                                    List<int> encodedImage =
-                                        img.encodeJpg(image, quality: quality);
+                                    // calculate the quality of the image to be max 4 kb
+                                    var quality = (256 * 256) /
+                                        (file.lengthSync() /
+                                            100.roundToDouble());
+
+                                    List<int> encodedImage = img.encodeJpg(
+                                        image,
+                                        quality: quality.toInt());
 
                                     macroImgBytes = encodedImage.isNotEmpty
                                         ? Uint8List.fromList(encodedImage)
