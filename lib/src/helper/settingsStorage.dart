@@ -16,4 +16,29 @@ class SharedPref {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(key);
   }
+
+  getKitsuDeck() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getString("kitsuDeck"));
+  }
+
+  setKitsuDeck(
+    hostname,
+    ip,
+    pin,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+        "kitsuDeck",
+        json.encode({
+          "hostname": hostname,
+          "ip": ip,
+          "pin": pin,
+        }));
+  }
+
+  removeKitsuDeck() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove("kitsuDeck");
+  }
 }

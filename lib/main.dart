@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:convert';
 
+import 'package:kitsu_deck_dash/src/classes/kitsu_deck/device.dart';
+import 'package:kitsu_deck_dash/src/classes/websocket/connector.dart';
+import 'package:provider/provider.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/material.dart';
 
 import 'src/app.dart';
-import 'src/sites/settings/settings_controller.dart';
-import 'src/sites/settings/settings_service.dart';
-import 'src/helper/settingsStorage.dart';
-import 'src/helper/websocket/ws.dart';
 
 String getTrayImagePath(String imageName) {
   return Platform.isWindows
@@ -35,7 +33,7 @@ void main() async {
     // We first init the systray menu and then add the menu entries
     await systemTray.initSystemTray(iconPath: getTrayImagePath('app_icon'));
     systemTray.setTitle("DeckDash");
-    systemTray.setToolTip("Dashboard for the KitsuDeck");
+    systemTray.setToolTip("KitsuDeckDash");
 
     // handle system tray event
     systemTray.registerSystemTrayEventHandler((eventName) {
@@ -78,29 +76,6 @@ void main() async {
 
   await initSystemTray();
 
-  // check if there is a KitsuDeck saved in the shared preferences
-  SharedPref sharedPref = SharedPref();
-  var kitsuDeck = await sharedPref.read("kitsuDeck");
-  if (kitsuDeck == null) {
-  } else {
-    // connect to the websocket
-    final webSocketUrl = "ws://${jsonDecode(kitsuDeck)["hostname"]}/ws";
-    WebSocketService webSocketService = WebSocketService(webSocketUrl);
-    await webSocketService.connect();
-  }
-
-  // Set up the SettingsController, which will glue user settings to multiple
-  // Flutter Widgets.
-  final settingsController = SettingsController(SettingsService());
-
-  // Load the user's preferred theme while the splash screen is displayed.
-  // This prevents a sudden theme change when the app is first displayed.
-  await settingsController.loadSettings();
-
-  // Run the app and pass in the SettingsController. The app listens to the
-  // SettingsController for changes, then passes it further down to the
-  // SettingsView.
-  runApp(MyApp(settingsController: settingsController));
   // windowManager code
   await windowManager.ensureInitialized();
 
@@ -117,4 +92,14 @@ void main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<DeckWebsocket>(
+        create: (context) => DeckWebsocket(),
+      ),
+      ChangeNotifierProvider<KitsuDeck>(create: (context) => KitsuDeck())
+    ],
+    child: const KitsuDeckDash(),
+  ));
 }

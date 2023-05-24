@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:kitsu_deck_dash/src/sites/kitsu_deck/index.dart';
+import 'package:kitsu_deck_dash/src/sites/settings/navbar.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../helper/navbar.dart';
-
-/// Displays a list of SampleItems.
 class MainView extends StatefulWidget {
-  final Widget child;
-  final String title;
-  bool canGoBack = false;
-  MainView(
-      {Key? key,
-      required this.child,
-      required this.title,
-      this.canGoBack = false})
-      : super(key: key);
+  const MainView({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  _SampleItemListViewState createState() => _SampleItemListViewState();
+  MainViewState createState() => MainViewState();
 }
 
-class _SampleItemListViewState extends State<MainView> with WindowListener {
+class MainViewState extends State<MainView> with WindowListener {
+  int _selectedIndex = 0;
+  bool _isExpanded = false;
+
   @override
   void initState() {
     windowManager.addListener(this);
-    _init();
+    init();
     // Disable the default Mac OS buttons
     super.initState();
   }
@@ -34,7 +30,7 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
     super.dispose();
   }
 
-  void _init() async {
+  void init() async {
     // Add this line to override the default close handler
     await windowManager.setPreventClose(true);
     setState(() {});
@@ -44,7 +40,6 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
   void onWindowFocus() {
     // Make sure to call once.
     setState(() {});
-    // do something
   }
 
   @override
@@ -52,7 +47,9 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
     bool isPreventClose = await windowManager.isPreventClose();
     await windowManager.show();
     await windowManager.focus();
+
     if (isPreventClose) {
+      // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (_) {
@@ -85,77 +82,131 @@ class _SampleItemListViewState extends State<MainView> with WindowListener {
   Widget build(BuildContext context) {
     return DragToResizeArea(
       child: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
-        body: Row(
-          children: [
-            const Navbar(),
-            Expanded(
-              // background color of the row
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DragToMoveArea(
-                    child: SizedBox(
-                      height: 40,
-                      child: Row(children: [
-                        if (widget.canGoBack)
-                          // create a icon button without animations
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Text(widget.title,
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold)),
-                        ),
-                        const Spacer(),
-                        //minimize button
-                        IconButton(
-                            onPressed: () async {
-                              await windowManager.minimize();
-                            },
-                            icon: const Icon(Icons.minimize)),
-                        //Maximize button
-                        IconButton(
-                            onPressed: () async {
-                              // check if the window is maximized
-                              bool isMaximized =
-                                  await windowManager.isMaximized();
-                              if (isMaximized) {
-                                await windowManager.unmaximize();
-                              } else {
-                                // if the window is not maximized, maximize it
-                                await windowManager.maximize();
-                              }
-                              setState(() {});
-                            },
-                            icon: const Icon(Icons.crop_square)),
-                        //close button
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () async {
-                            // will just hide the program to the tray
-                            await windowManager.hide();
-                            await windowManager.setSkipTaskbar(true);
-                          },
-                        )
-                      ]),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: widget.child,
-                  ),
+          body: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              // add gradient from top left top bottomright
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.6),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.2),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
+            height: 25,
+            child: Row(
+              children: [
+                TextButton(
+                    child: _isExpanded
+                        ? const Icon(Icons.menu_open)
+                        : const Icon(Icons.menu),
+                    onPressed: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    }),
+                const Expanded(
+                  child: DragToMoveArea(
+                      child: SizedBox(
+                    width: double.infinity,
+                    height: 25,
+                  )),
+                ),
+                Row(children: [
+                  TextButton(
+                      onPressed: () async {
+                        await windowManager.minimize();
+                      },
+                      child: const Icon(Icons.minimize)),
+                  //Maximize button
+                  TextButton(
+                      onPressed: () async {
+                        // check if the window is maximized
+                        bool isMaximized = await windowManager.isMaximized();
+                        if (isMaximized) {
+                          await windowManager.unmaximize();
+                        } else {
+                          // if the window is not maximized, maximize it
+                          await windowManager.maximize();
+                        }
+                        setState(() {});
+                      },
+                      child: const Icon(Icons.crop_square)),
+                  //close button
+                  TextButton(
+                    child: const Icon(Icons.close),
+                    onPressed: () async {
+                      // will just hide the program to the tray
+                      await windowManager.hide();
+                      await windowManager.setSkipTaskbar(true);
+                    },
+                  )
+                ])
+              ],
+            ),
+          ),
+          Expanded(
+              child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        // add gradient from top left top bottomright
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.6),
+                            Theme.of(context)
+                                .colorScheme
+                                .secondary
+                                .withOpacity(0.6),
+                          ],
+                        ),
+                      ),
+                      child: NavigationRail(
+                        minExtendedWidth: 200,
+                        backgroundColor: Colors.transparent,
+                        extended: _isExpanded,
+                        selectedIndex: _selectedIndex,
+                        destinations: const [
+                          NavigationRailDestination(
+                            icon: Icon(Icons.keyboard_outlined),
+                            selectedIcon: Icon(Icons.keyboard),
+                            label: Text('KitsuDeck'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.settings_outlined),
+                            selectedIcon: Icon(Icons.settings),
+                            label: Text('Settings'),
+                          ),
+                        ],
+                        onDestinationSelected: (int index) {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                      ),
+                    ),
+
+                    // background color of the row
+
+                    if (_selectedIndex == 0)
+                      const KitsuDeckDashboard()
+                    else if (_selectedIndex == 1)
+                      const SettingsNavbar(),
+                  ],
+                ),
+              )
+            ],
+          ))
+        ],
+      )),
     );
   }
 }

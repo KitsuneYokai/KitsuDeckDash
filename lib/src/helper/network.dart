@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 getCurrentIP() async {
   final interfaces = await NetworkInterface.list();
@@ -16,11 +18,32 @@ getCurrentIP() async {
   }
 }
 
-Future<List<String>> getKitsuDeckHostname() async {
+kitsuDeckValidationCheck(String address) async {
+  final url = Uri.parse('http://$address');
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      var responseData = {
+        "hostname": data["hostname"],
+        "ip": data["ip"],
+        "protected": data["protected"],
+      };
+      return responseData;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<List<Map>> getKitsuDeckHostname() async {
   final ipList = <String>[];
+  final returnList = <Map>[];
   final currentIP = await getCurrentIP();
   if (currentIP == null) {
-    return ipList;
+    return returnList;
   }
   final baseIP = currentIP.substring(0, currentIP.lastIndexOf('.') + 1);
   final futures = <Future>[];
@@ -29,7 +52,7 @@ Future<List<String>> getKitsuDeckHostname() async {
     final address = InternetAddress(ip);
     final lookup = address.reverse();
     futures.add(lookup.then((result) {
-      if (result.host.startsWith('kitsudeck-')) {
+      if (result.host.startsWith('KitsuDeck-')) {
         ipList.add(result.host);
       }
     }).catchError((error) {
@@ -37,5 +60,32 @@ Future<List<String>> getKitsuDeckHostname() async {
     }));
   }
   await Future.wait(futures);
-  return ipList;
+  for (final ip in ipList) {
+    // make a http request to the ip
+    final response = await kitsuDeckValidationCheck(ip);
+    if (response != false) {
+      returnList.add(response);
+    }
+  }
+  return returnList;
+}
+
+pinValidationCheck(String address, String pin) async {
+  final url = Uri.parse('http://$address/auth');
+  try {
+    // make a post request to the ip
+    final response = await http.post(url, body: jsonEncode({"auth_pin": pin}));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data["status"] == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
 }
