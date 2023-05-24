@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../classes/kitsu_deck/device.dart';
+import '../../classes/websocket/connector.dart';
 import '../../helper/network.dart';
 
 class AddKitsuDeck extends StatefulWidget {
@@ -49,7 +50,7 @@ class AddKitsuDeckState extends State<AddKitsuDeck> {
   @override
   Widget build(BuildContext context) {
     final kitsuDeck = Provider.of<KitsuDeck>(context);
-
+    final gateway = Provider.of<DeckWebsocket>(context);
     return AlertDialog(
         // dont close dialog when tapped outside
         title: Row(children: [
@@ -221,6 +222,8 @@ class AddKitsuDeckState extends State<AddKitsuDeck> {
                           ip,
                           pin,
                         );
+                        gateway.initConnection(
+                            "ws://$hostname/ws", pin.toString());
                         Navigator.pop(context);
                       },
                       icon: const Icon(

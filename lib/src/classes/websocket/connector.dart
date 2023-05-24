@@ -8,17 +8,37 @@ class DeckWebsocket extends ChangeNotifier {
   late StreamController<String> _streamController;
   late IOWebSocketChannel _webSocketChannel;
   late String _url;
+  late String _pin;
   bool _isConnected = false;
+  bool _isSecured = false;
+  bool _isAuthed = false;
   bool _breakConnection = false;
   Timer? _reconnectTimer;
 
   String get url => _url;
   Stream<String> get stream => _streamController.stream;
+  String get pin => _pin;
   bool get isConnected => _isConnected;
+  bool get isSecured => _isSecured;
+  bool get isAuthed => _isAuthed;
   bool get breakConnection => _breakConnection;
+
+  void setPin(String pin) {
+    _pin = pin;
+  }
 
   void setIsConnected(bool isConnected) {
     _isConnected = isConnected;
+    notifyListeners();
+  }
+
+  void setIsSecured(bool isSecured) {
+    _isSecured = isSecured;
+    notifyListeners();
+  }
+
+  void setIsAuthed(bool isAuthed) {
+    _isAuthed = isAuthed;
     notifyListeners();
   }
 
@@ -27,13 +47,9 @@ class DeckWebsocket extends ChangeNotifier {
     notifyListeners();
   }
 
-  void set_url(String url) {
-    _url = url;
-  }
-
-  void initConnection(String url) {
-    set_url(url);
+  void initConnection(String url, String pin) {
     connect(url);
+    setPin(pin);
   }
 
   void connect(String url) {
@@ -41,18 +57,40 @@ class DeckWebsocket extends ChangeNotifier {
       _streamController = StreamController.broadcast();
       _webSocketChannel =
           IOWebSocketChannel.connect(url, pingInterval: Duration(seconds: 5));
-
       _webSocketChannel.stream.listen(
         (data) {
           if (!_isConnected) {
             setIsConnected(true);
           }
-
           _streamController.add(data);
           if (kDebugMode) {
             // Print every event in debug mode
             print("Received from websocket: $data");
           }
+
+          Map jsonData = jsonDecode(data);
+          // if the deck is secured by a pin send the pin
+          if (jsonData["event"] == "CLIENT_AUTH" &&
+              jsonData["protected"] == true) {
+            setIsSecured(true);
+            if (kDebugMode) {
+              print("Sending CLIENT_AUTH");
+            }
+            send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": "3"}));
+          }
+          // if the auth was successful
+          if (jsonData["event"] == "CLIENT_AUTH_SUCCESS") {
+            setIsAuthed(true);
+            if (kDebugMode) {
+              print("Client auth success");
+            }
+          } else if (jsonData["event"] == "CLIENT_AUTH_FAILED") {
+            disconnect();
+            if (kDebugMode) {
+              print("Client auth failed");
+            }
+          }
+
           // Handle the events
         },
         onError: (error) {
@@ -124,7 +162,7 @@ class DeckWebsocket extends ChangeNotifier {
     _reconnectTimer?.cancel();
     _webSocketChannel.sink.close();
     _breakConnection = true;
-
+    _isConnected = false;
     notifyListeners();
   }
 }

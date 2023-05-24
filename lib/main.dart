@@ -93,12 +93,22 @@ void main() async {
     await windowManager.focus();
   });
 
+  // initialize the KitsuDeck class with the shared preferences settings
+  final kitsuDeck = KitsuDeck();
+  await kitsuDeck.initKitsuDeckSettings();
+
+  final websocket = DeckWebsocket();
+
+  if (kitsuDeck.ip != null.toString()) {
+    websocket.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
+  }
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<DeckWebsocket>(
-        create: (context) => DeckWebsocket(),
+        create: (context) => websocket,
       ),
-      ChangeNotifierProvider<KitsuDeck>(create: (context) => KitsuDeck())
+      ChangeNotifierProvider<KitsuDeck>(create: (context) => kitsuDeck)
     ],
     child: const KitsuDeckDash(),
   ));

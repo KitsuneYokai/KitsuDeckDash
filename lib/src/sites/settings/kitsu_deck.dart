@@ -54,6 +54,9 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                         children: [
                           Text("KitsuDeck Hostname: ${kitsuDeck.hostname!}"),
                           Text("KitsuDeck IP: ${kitsuDeck.ip!}"),
+                          Text("Is connected: ${websocket.isConnected}"),
+                          Text("Is authenticated: ${websocket.isAuthed}"),
+                          Text("Is secure: ${websocket.isSecured}"),
                           TextButton(
                             child: const Text("Remove KitsuDeck"),
                             onPressed: () async {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -49,7 +51,7 @@ class DebugSettingsState extends State<DebugSettings> {
                       TextButton(
                         child: const Text("Test Websocket"),
                         onPressed: () async {
-                          websocket.send("Test");
+                          websocket.send('{"type":"ping"}');
                         },
                       ),
                     ],
