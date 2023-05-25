@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:kitsu_deck_dash/src/classes/kitsu_deck/device.dart';
 import 'package:provider/provider.dart';
 
 import '../../classes/websocket/connector.dart';
 import '../../helper/settingsStorage.dart';
+import '../kitsu_deck/auth_device.dart';
 
 class DebugSettings extends StatefulWidget {
   const DebugSettings({
@@ -21,6 +23,7 @@ class DebugSettingsState extends State<DebugSettings> {
   @override
   Widget build(BuildContext context) {
     final sharedPref = SharedPref();
+    final kitsuDeck = Provider.of<KitsuDeck>(context, listen: false);
     final websocket = Provider.of<DeckWebsocket>(context, listen: false);
 
     return Expanded(
@@ -49,9 +52,9 @@ class DebugSettingsState extends State<DebugSettings> {
                   child: Column(
                     children: [
                       TextButton(
-                        child: const Text("Test Websocket"),
-                        onPressed: () async {
-                          websocket.send('{"type":"ping"}');
+                        child: Text("Reauth KitsuDeck"),
+                        onPressed: () {
+                          showAuthenticateKitsuDeck(context);
                         },
                       ),
                     ],

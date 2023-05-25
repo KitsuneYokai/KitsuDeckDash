@@ -41,6 +41,19 @@ class KitsuDeckDashState extends State<KitsuDeckDash> {
         ),
       ),
       darkTheme: ThemeData(
+        navigationRailTheme: const NavigationRailThemeData(
+          backgroundColor: Colors.grey,
+          selectedIconTheme: IconThemeData(color: Colors.white),
+          selectedLabelTextStyle: TextStyle(color: Colors.white),
+          unselectedIconTheme: IconThemeData(color: Colors.white),
+          unselectedLabelTextStyle: TextStyle(color: Colors.white),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.grey.withOpacity(0.38),
+          ),
+        ),
         brightness: Brightness.dark,
         primaryColor: Colors.blueGrey[700], // adjust to your liking
         scaffoldBackgroundColor: Colors.grey[800],
@@ -71,20 +84,5 @@ class KitsuDeckDashState extends State<KitsuDeckDash> {
         });
       },
     );
-  }
-}
-
-class NoTransitionBuilder extends PageTransitionsBuilder {
-  const NoTransitionBuilder();
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
   }
 }

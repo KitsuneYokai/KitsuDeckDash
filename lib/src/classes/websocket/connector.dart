@@ -25,6 +25,7 @@ class DeckWebsocket extends ChangeNotifier {
 
   void setPin(String pin) {
     _pin = pin;
+    notifyListeners();
   }
 
   void setIsConnected(bool isConnected) {
@@ -76,7 +77,11 @@ class DeckWebsocket extends ChangeNotifier {
             if (kDebugMode) {
               print("Sending CLIENT_AUTH");
             }
-            send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": "3"}));
+            send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": _pin}));
+          }
+          if (jsonData["event"] == "CLIENT_AUTH" &&
+              jsonData["protected"] == false) {
+            setPin("");
           }
           // if the auth was successful
           if (jsonData["event"] == "CLIENT_AUTH_SUCCESS") {

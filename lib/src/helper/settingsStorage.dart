@@ -28,7 +28,7 @@ class SharedPref {
     pin,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(
+    await prefs.setString(
         "kitsuDeck",
         json.encode({
           "hostname": hostname,

@@ -12,6 +12,11 @@ class KitsuDeck extends ChangeNotifier {
   get ip => _ip;
   get pin => _pin;
 
+  void setPin(String pin) {
+    _pin = pin;
+    notifyListeners();
+  }
+
   initKitsuDeckSettings() async {
     final sharedPref = SharedPref();
     final kitsuDeck = await sharedPref.getKitsuDeck();
@@ -33,7 +38,6 @@ class KitsuDeck extends ChangeNotifier {
     _ip = ip;
     _pin = pin;
     final sharedPref = SharedPref();
-
     await sharedPref.setKitsuDeck(
       hostname,
       ip,
