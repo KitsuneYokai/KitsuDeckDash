@@ -90,7 +90,7 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         TextFormField(
                           enabled: false,
@@ -109,27 +109,14 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                         const SizedBox(height: 16),
                         Expanded(
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.router,
-                                          color: Colors.white),
-                                      const SizedBox(width: 8),
-                                      const Text(
-                                        "IP:",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                      Text(
-                                        kitsuDeck.ip,
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                    ],
+                                  Text(
+                                    "IP: ${kitsuDeck.ip}",
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                   const SizedBox(height: 8),
                                   Row(
@@ -182,29 +169,6 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                                       ),
                                     ],
                                   ),
-                                  if (websocket.isConnected)
-                                    Slider(
-                                      value: _brightness,
-                                      max: 100,
-                                      min: 10,
-                                      divisions: 5,
-                                      label: _brightness.round().toString(),
-                                      onChanged: (double value) {
-                                        // convert the value to be maximum 255 and minimum 10
-                                        double newValue = value / 100 * 255;
-                                        if (newValue < 10) {
-                                          newValue = 10;
-                                        }
-                                        websocket.send(jsonEncode({
-                                          "event": "SET_BRIGHTNESS",
-                                          "value": "${newValue.round()}",
-                                          "auth_pin": websocket.pin
-                                        }));
-                                        setState(() {
-                                          _brightness = value;
-                                        });
-                                      },
-                                    ),
                                 ],
                               ),
                               if (!websocket.isConnected &&
@@ -218,6 +182,37 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                             ],
                           ),
                         ),
+                        if (websocket.isConnected) ...{
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              const Icon(Icons.brightness_low),
+                              Slider(
+                                value: _brightness,
+                                max: 100,
+                                min: 10,
+                                divisions: 5,
+                                label: _brightness.round().toString(),
+                                onChanged: (double value) {
+                                  // convert the value to be maximum 255 and minimum 10
+                                  double newValue = value / 100 * 255;
+                                  if (newValue < 10) {
+                                    newValue = 10;
+                                  }
+                                  websocket.send(jsonEncode({
+                                    "event": "SET_BRIGHTNESS",
+                                    "value": "${newValue.round()}",
+                                    "auth_pin": websocket.pin
+                                  }));
+                                  setState(() {
+                                    _brightness = value;
+                                  });
+                                },
+                              ),
+                              const Icon(Icons.brightness_high),
+                            ],
+                          )
+                        },
                         const Spacer(),
                         ElevatedButton(
                           onPressed: () async {
@@ -230,11 +225,10 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                           ),
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
+                              children: const [
                                 Icon(Icons.delete, color: Colors.white),
                                 Text("Remove KitsuDeck",
-                                    style:
-                                        const TextStyle(color: Colors.white)),
+                                    style: TextStyle(color: Colors.white)),
                               ]),
                         ),
                       ],

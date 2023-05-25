@@ -21,90 +21,99 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
     final sharedPref = SharedPref();
     final kitsuDeck = Provider.of<KitsuDeck>(context);
     final websocket = Provider.of<DeckWebsocket>(context);
+
     if (kitsuDeck.hostname != null.toString() &&
         kitsuDeck.ip != null.toString()) {
       return Expanded(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Padding(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Container(
-                    decoration: BoxDecoration(
-                      // add gradient from top left top bottom right
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).primaryColor.withOpacity(0.6),
-                          Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withOpacity(0.2),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.9),
+                        Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withOpacity(0.4),
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          const Spacer(),
-                          const Icon(
-                            Icons.tablet_android,
-                            size: 50,
-                          ),
-                          Text(kitsuDeck.hostname),
-                          Icon(
-                            websocket.isConnected
-                                ? Icons.check_circle
-                                : Icons.error,
-                            color: websocket.isConnected
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                          const Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.code),
-                                    onPressed:
-                                        websocket.isConnected ? () {} : null,
-                                  ),
-                                  const Text("Macros"),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.bar_chart),
-                                    onPressed:
-                                        websocket.isConnected ? () {} : null,
-                                  ),
-                                  const Text("Stats"),
-                                ],
-                              ),
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.settings),
-                                    onPressed: () {},
-                                  ),
-                                  const Text("Settings"),
-                                ],
-                              ),
-                            ],
-                          )
-                        ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 5,
+                        offset: const Offset(0, 2),
                       ),
-                    ))),
-          )
-        ],
-      ));
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Spacer(),
+                        const Icon(
+                          Icons.tablet_android,
+                          size: 50,
+                        ),
+                        Text(kitsuDeck.hostname),
+                        Icon(
+                          websocket.isConnected
+                              ? Icons.check_circle
+                              : Icons.error,
+                          color:
+                              websocket.isConnected ? Colors.green : Colors.red,
+                        ),
+                        Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.code),
+                                  onPressed:
+                                      websocket.isConnected ? () {} : null,
+                                ),
+                                const Text("Macros"),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.bar_chart),
+                                  onPressed:
+                                      websocket.isConnected ? () {} : null,
+                                ),
+                                const Text("Stats"),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.settings),
+                                  onPressed: () {},
+                                ),
+                                const Text("Settings"),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     } else {
       return const Expanded(child: NoKitsuDeck());
     }
