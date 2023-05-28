@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../../helper/settingsStorage.dart';
-import '../kitsu_deck/auth_device.dart';
-import '../kitsu_deck/no_device.dart';
+import 'auth_device.dart';
+import 'no_device.dart';
 
 class KitsuDeckSettings extends StatefulWidget {
   const KitsuDeckSettings({
@@ -98,10 +98,7 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                           decoration: const InputDecoration(
                             labelText: "Hostname",
                             labelStyle: TextStyle(color: Colors.white),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            focusedBorder: OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.white),
                             ),
                           ),
@@ -187,28 +184,30 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               const Icon(Icons.brightness_low),
-                              Slider(
-                                value: _brightness,
-                                max: 100,
-                                min: 10,
-                                divisions: 5,
-                                label: _brightness.round().toString(),
-                                onChanged: (double value) {
-                                  // convert the value to be maximum 255 and minimum 10
-                                  double newValue = value / 100 * 255;
-                                  if (newValue < 10) {
-                                    newValue = 10;
-                                  }
-                                  websocket.send(jsonEncode({
-                                    "event": "SET_BRIGHTNESS",
-                                    "value": "${newValue.round()}",
-                                    "auth_pin": websocket.pin
-                                  }));
-                                  setState(() {
-                                    _brightness = value;
-                                  });
-                                },
-                              ),
+                              Flexible(
+                                  flex: 3,
+                                  child: Slider(
+                                    value: _brightness,
+                                    max: 100,
+                                    min: 10,
+                                    divisions: 4,
+                                    label: _brightness.round().toString(),
+                                    onChanged: (double value) {
+                                      // convert the value to be maximum 255 and minimum 10
+                                      double newValue = value / 100 * 255;
+                                      if (newValue < 10) {
+                                        newValue = 10;
+                                      }
+                                      websocket.send(jsonEncode({
+                                        "event": "SET_BRIGHTNESS",
+                                        "value": "${newValue.round()}",
+                                        "auth_pin": websocket.pin
+                                      }));
+                                      setState(() {
+                                        _brightness = value;
+                                      });
+                                    },
+                                  )),
                               const Icon(Icons.brightness_high),
                             ],
                           )

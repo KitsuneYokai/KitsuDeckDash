@@ -137,8 +137,7 @@ class MainViewState extends State<MainView> with WindowListener {
                       child: const Icon(Icons.crop_square)),
                   //close button
                   TextButton(
-                    child: const Icon(Icons.close),
-                    style: TextButton.styleFrom(onSurface: Colors.red),
+                    child: Icon(Icons.close, color: Colors.white),
                     onPressed: () async {
                       // will just hide the program to the tray
                       await windowManager.hide();

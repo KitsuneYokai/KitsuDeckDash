@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../../helper/settingsStorage.dart';
-import 'no_device.dart';
+import '../settings/no_device.dart';
+import 'macro_dashboard.dart';
 
 class KitsuDeckDashboard extends StatefulWidget {
   const KitsuDeckDashboard({
@@ -78,8 +79,11 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.code),
-                                  onPressed:
-                                      websocket.isConnected ? () {} : null,
+                                  onPressed: websocket.isConnected
+                                      ? () async {
+                                          showMacroDashboard(context);
+                                        }
+                                      : null,
                                 ),
                                 const Text("Macros"),
                               ],
@@ -89,18 +93,9 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                                 IconButton(
                                   icon: const Icon(Icons.bar_chart),
                                   onPressed:
-                                      websocket.isConnected ? () {} : null,
+                                      websocket.isConnected ? null : null,
                                 ),
                                 const Text("Stats"),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.settings),
-                                  onPressed: () {},
-                                ),
-                                const Text("Settings"),
                               ],
                             ),
                           ],

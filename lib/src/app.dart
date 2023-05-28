@@ -41,6 +41,20 @@ class KitsuDeckDashState extends State<KitsuDeckDash> {
         ),
       ),
       darkTheme: ThemeData(
+        // text field
+        inputDecorationTheme: InputDecorationTheme(
+          // background color
+          fillColor: Colors.grey[800]!.withOpacity(0.4),
+          filled: true,
+          // change border
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey[700]!, width: 3),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Colors.grey[200]!.withOpacity(0.4), width: 3),
+          ),
+        ),
         navigationRailTheme: const NavigationRailThemeData(
           backgroundColor: Colors.grey,
           selectedIconTheme: IconThemeData(color: Colors.white),

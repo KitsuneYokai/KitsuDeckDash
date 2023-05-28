@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../classes/websocket/connector.dart';
 import '../../helper/settingsStorage.dart';
-import '../kitsu_deck/auth_device.dart';
+import 'auth_device.dart';
 
 class DebugSettings extends StatefulWidget {
   const DebugSettings({
