@@ -274,27 +274,21 @@ class MacroModalState extends State<MacroModal> {
                                                 List<dynamic> accepted,
                                                 List<dynamic> rejected,
                                               ) {
-                                                final isActive =
-                                                    accepted.isNotEmpty;
-                                                return Container(
-                                                  color: isActive
-                                                      ? Colors.grey
-                                                      : null,
-                                                  child: ElevatedButton(
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor:
-                                                          Colors.white70,
-                                                    ),
-                                                    child: Text(
-                                                      macroRecording[index]
-                                                          ["key"],
-                                                      style: const TextStyle(
-                                                          fontSize: 20),
-                                                    ),
-                                                    onPressed: () async {},
+                                                return ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.white70,
                                                   ),
+                                                  child: Text(
+                                                    macroRecording[index]
+                                                        ["key"],
+                                                    style: const TextStyle(
+                                                        fontSize: 20),
+                                                  ),
+                                                  onPressed: () async {},
                                                 );
+                                                ;
                                               },
                                               onAccept: (int? acceptedIndex) {
                                                 if (acceptedIndex != null) {
@@ -328,9 +322,9 @@ class MacroModalState extends State<MacroModal> {
                                     child: ElevatedButton(
                                         onPressed: () {},
                                         child: Row(
-                                          children: [
-                                            const Icon(Icons.save),
-                                            const Text("save macro")
+                                          children: const [
+                                            Icon(Icons.save),
+                                            Text("save macro")
                                           ],
                                         )),
                                   ),
