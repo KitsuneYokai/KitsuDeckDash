@@ -5,7 +5,7 @@ import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../../helper/settingsStorage.dart';
 import '../settings/no_device.dart';
-import 'macro_dashboard.dart';
+import 'macro/macro_dashboard.dart';
 
 class KitsuDeckDashboard extends StatefulWidget {
   const KitsuDeckDashboard({
@@ -58,7 +58,7 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        Spacer(),
+                        const Spacer(),
                         const Icon(
                           Icons.tablet_android,
                           size: 50,
@@ -71,7 +71,7 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                           color:
                               websocket.isConnected ? Colors.green : Colors.red,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [

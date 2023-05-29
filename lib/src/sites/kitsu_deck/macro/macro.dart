@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kitsu_deck_dash/src/sites/kitsu_deck/macro/macro_images.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../classes/kitsu_deck/device.dart';
-import '../../classes/websocket/connector.dart';
+import '../../../classes/kitsu_deck/device.dart';
+import '../../../classes/websocket/connector.dart';
 
 const List<String> macroActions = <String>["Macro"];
 
@@ -18,6 +20,7 @@ class MacroModal extends StatefulWidget {
 }
 
 class MacroModalState extends State<MacroModal> {
+  Map _imageB64Return = {};
   int macroActionsValue = 0;
   bool isMacroRecording = false;
   List macroRecording = [];
@@ -29,7 +32,7 @@ class MacroModalState extends State<MacroModal> {
         var key = event.logicalKey.keyLabel;
         var code = event.logicalKey.keyId;
         if (key == " ") {
-          key = "Space";
+          key = "SPACE";
         }
         macroRecording = [
           ...macroRecording,
@@ -106,6 +109,7 @@ class MacroModalState extends State<MacroModal> {
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Column(
@@ -128,14 +132,74 @@ class MacroModalState extends State<MacroModal> {
                           ),
                         ),
                         Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(15),
-                            child: Column(
-                              children: const [
-                                Text("HERE WILL BE AN IMAGE"),
-                                Icon(Icons.add_circle_outline),
-                              ],
-                            ),
+                          child: Column(
+                            children: [
+                              if (_imageB64Return.isEmpty) ...{
+                                Container(
+                                  width: 158,
+                                  height: 158,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey[700]!,
+                                      width: 3,
+                                    ),
+                                  ),
+                                  child: InkWell(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add,
+                                            color:
+                                                Colors.white.withOpacity(0.5),
+                                          ),
+                                          const Text(
+                                            "Add Image",
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold),
+                                          )
+                                        ],
+                                      ),
+                                      onTap: () async {
+                                        final imageData =
+                                            await showMacroImagesModal(context);
+                                        setState(() {
+                                          _imageB64Return = imageData!;
+                                        });
+                                      }),
+                                )
+                              } else ...{
+                                Container(
+                                  width: 150,
+                                  height: 150,
+                                  child: Image.memory(
+                                    base64Decode(_imageB64Return["image"]),
+                                    fit: BoxFit.cover,
+                                    isAntiAlias: true,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _imageB64Return = {};
+                                    });
+                                  },
+                                )
+                              }
+                            ],
                           ),
                         ),
                       ],
@@ -238,7 +302,7 @@ class MacroModalState extends State<MacroModal> {
                             ),
                             if (macroRecording.isNotEmpty) ...[
                               const SizedBox(height: 10),
-                              Flexible(
+                              Expanded(
                                 child: SingleChildScrollView(
                                   child: Wrap(
                                     clipBehavior: Clip.antiAlias,
@@ -288,7 +352,6 @@ class MacroModalState extends State<MacroModal> {
                                                   ),
                                                   onPressed: () async {},
                                                 );
-                                                ;
                                               },
                                               onAccept: (int? acceptedIndex) {
                                                 if (acceptedIndex != null) {
@@ -320,11 +383,17 @@ class MacroModalState extends State<MacroModal> {
                                   Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                        ),
                                         onPressed: () {},
                                         child: Row(
                                           children: const [
-                                            Icon(Icons.save),
-                                            Text("save macro")
+                                            Icon(Icons.save,
+                                                color: Colors.white),
+                                            Text(" Save Macro",
+                                                style: TextStyle(
+                                                    color: Colors.white))
                                           ],
                                         )),
                                   ),

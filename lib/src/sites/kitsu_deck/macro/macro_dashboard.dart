@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../classes/kitsu_deck/device.dart';
-import '../../classes/websocket/connector.dart';
-import '../../helper/network.dart';
+import '../../../classes/kitsu_deck/device.dart';
+import '../../../classes/websocket/connector.dart';
+import '../../../helper/network.dart';
 import 'macro.dart';
 
 class MacroDashboard extends StatefulWidget {
