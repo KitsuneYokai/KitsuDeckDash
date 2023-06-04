@@ -173,15 +173,10 @@ class MacroModalState extends State<MacroModal> {
                                       }),
                                 )
                               } else ...{
-                                Container(
-                                  width: 150,
-                                  height: 150,
-                                  child: Image.memory(
-                                    base64Decode(_imageB64Return["image"]),
-                                    fit: BoxFit.cover,
-                                    isAntiAlias: true,
-                                  ),
-                                ),
+                                SizedBox(
+                                    width: 150,
+                                    height: 150,
+                                    child: _imageB64Return["image"]),
                                 const SizedBox(height: 10),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(

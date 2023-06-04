@@ -62,6 +62,7 @@ class DeckWebsocket extends ChangeNotifier {
         (data) {
           if (!_isConnected) {
             setIsConnected(true);
+            _url = url;
           }
           _streamController.add(data);
           if (kDebugMode) {

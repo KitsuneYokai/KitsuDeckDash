@@ -57,6 +57,7 @@ class DebugSettingsState extends State<DebugSettings> {
                           showAuthenticateKitsuDeck(context);
                         },
                       ),
+                      // load image bin file from downloads folder
                     ],
                   ))),
         )

@@ -10,10 +10,11 @@ environment:
   sdk: ">=2.18.6 <3.0.0"
 
 dependencies:
+  crop_image: ^1.0.9
   file_picker: ^5.2.5
   flutter:
     sdk: flutter
-  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons: ^0.13.1
   flutter_localizations:
     sdk: flutter
   http: ^0.13.5

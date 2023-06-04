@@ -89,3 +89,20 @@ pinValidationCheck(String address, String pin) async {
     return false;
   }
 }
+
+getMacroImage(String address, String pin, String name) async {
+  final url = Uri.parse('http://$address/getMacroImage');
+  try {
+    // make a post request to the ip
+    final response = await http.post(url,
+        body: jsonEncode({"auth_pin": "$pin", "name": "$name"}),
+        headers: {"Content-Type": "application/json"});
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}

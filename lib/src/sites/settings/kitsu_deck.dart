@@ -43,6 +43,9 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
           if (jsonData["event"] == "GET_BRIGHTNESS") {
             setState(() {
               _brightness = jsonData["value"] / 255 * 100;
+              if (_brightness < 10) {
+                _brightness = 10;
+              }
               _isInit = true;
             });
             return true;
