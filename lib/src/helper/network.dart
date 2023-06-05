@@ -106,3 +106,28 @@ getMacroImage(String address, String pin, String name) async {
     return false;
   }
 }
+
+Future<bool> postMacroImage(
+    String address, String pin, http.MultipartFile image) async {
+  final url = Uri.parse('http://$address/postMacroImage');
+  print(url);
+  try {
+    final request = http.MultipartRequest('POST', url);
+    request.headers['Content-Type'] =
+        'multipart/form-data'; // Set the correct content-type
+    request.files.add(image);
+    request.fields.addAll({'auth_pin': "$pin"});
+    // print all fields
+    print(request.fields);
+    final response = await request.send();
+    if (response.statusCode == 200) {
+      // TODO: check if the image was uploaded successfully
+      return true;
+    } else {
+      print(response.statusCode);
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}

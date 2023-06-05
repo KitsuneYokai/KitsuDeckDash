@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crop_image/crop_image.dart';
+import 'package:image/image.dart' as IMG;
 
 import '../../../classes/kitsu_deck/device.dart';
 import '../../../classes/websocket/connector.dart';
@@ -105,15 +108,15 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                               color: Colors.white,
                             )),
                       ),
-                      Expanded(
+                      const Expanded(
                         child: DragToMoveArea(
                           child: SizedBox(
                             width: double.infinity,
                             height: 55,
                             child: Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10),
                               child: Row(
-                                children: const [
+                                children: [
                                   Spacer(),
                                   Text(
                                     "Macro images",
@@ -215,11 +218,10 @@ class MacroImagesUploadModal extends StatefulWidget {
 class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
   var _image;
 
+  var imageCropController;
+
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
-
     return Padding(
       padding: const EdgeInsets.all(20),
       child: BackdropFilter(
@@ -258,15 +260,15 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
                           ),
                         ),
                       ),
-                      Expanded(
+                      const Expanded(
                         child: DragToMoveArea(
                           child: SizedBox(
                             width: double.infinity,
                             height: 55,
                             child: Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(10),
                               child: Row(
-                                children: const [
+                                children: [
                                   Spacer(),
                                   Text(
                                     "Upload macro image",
@@ -283,57 +285,92 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        // make border gradient
-                        color: Theme.of(context)
-                            .colorScheme
-                            .secondary
-                            .withOpacity(0.4),
-                        width: 5,
+                  if (_image == null) ...{
+                    const Spacer(),
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          // make border gradient
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondary
+                              .withOpacity(0.4),
+                          width: 5,
+                        ),
+                      ),
+                      child: InkWell(
+                        onTap: () async {
+                          // open file picker
+                          FilePickerResult? result =
+                              await FilePicker.platform.pickFiles(
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'png', 'bmp'],
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _image = File(result.files.single.path!);
+                              imageCropController = CropController(
+                                aspectRatio: 1,
+                                defaultCrop:
+                                    const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
+                              );
+                            });
+                          } else {
+                            // User canceled the picker
+                          }
+                        },
+                        child: const Icon(
+                          Icons.upload_file,
+                          size: 75,
+                        ),
                       ),
                     ),
-                    child: _image != null
-                        ? Image(
-                            image: _image,
-                          )
-                        : InkWell(
-                            onTap: () async {
-                              // open file picker
-                              FilePickerResult? result =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: ['jpg', 'png', 'bmp'],
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  _image = File(result.files.single.path!);
-                                });
-                              } else {
-                                // User canceled the picker
-                              }
-                            },
-                            child: const Icon(
-                              Icons.upload_file,
-                              size: 75,
-                            ),
-                          ),
-                  ),
-                  const Spacer(),
+                    Spacer(),
+                  },
+                  if (_image != null)
+                    Expanded(
+                        child: CropImage(
+                      image: Image.file(_image),
+                      controller: imageCropController,
+                      alwaysMove: true,
+                    )),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Row(
                       children: [
+                        if (_image != null) ...{
+                          TextButton(
+                            onPressed: () {
+                              imageCropController.rotateRight();
+                            },
+                            child: const Icon(Icons.rotate_90_degrees_cw),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _image = null;
+                              });
+                            },
+                            child: const Icon(Icons.delete),
+                          ),
+                        },
                         const Spacer(),
                         ElevatedButton(
                           onPressed: _image != null
                               ? () async {
-                                  // upload image
+                                  // crop image
+                                  Image croppedImage =
+                                      await imageCropController.croppedImage();
+                                  var bitmap =
+                                      await imageCropController.croppedBitmap();
+
+                                  bool? upload =
+                                      await showMacroImagesUploadConfirmModal(
+                                          context, croppedImage, bitmap);
+                                  print(upload);
                                 }
                               : null,
                           style: ElevatedButton.styleFrom(
@@ -365,7 +402,105 @@ Future<bool?> showMacroImagesUploadModal(BuildContext context) async {
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return MacroImagesUploadModal();
+      return const MacroImagesUploadModal();
+    },
+  );
+}
+
+class MacroImagesUploadConfirmModal extends StatefulWidget {
+  final Image croppedImage;
+  final bitmap;
+  const MacroImagesUploadConfirmModal(
+      {super.key, required this.croppedImage, required this.bitmap});
+
+  @override
+  MacroImagesUploadConfirmModalState createState() =>
+      MacroImagesUploadConfirmModalState();
+}
+
+class MacroImagesUploadConfirmModalState
+    extends State<MacroImagesUploadConfirmModal> {
+  final String _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final Random _rnd = Random();
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
+  @override
+  Widget build(BuildContext context) {
+    final kitsuDeck = Provider.of<KitsuDeck>(context);
+    final websocket = Provider.of<DeckWebsocket>(context);
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: AlertDialog(
+        title: const Text("Is this the image you want to upload?"),
+        content: SizedBox(
+          height: 400,
+          child: Center(child: Image(image: widget.croppedImage.image)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: const Text("No"),
+          ),
+          TextButton(
+            onPressed: () async {
+              // TODO: add more image formats (final supported formats: jpg, png, bmp and maybe gif)
+              // generate random filename it should be numbers and letters and not datetime
+              var filename = getRandomString(10);
+              // upload to kitsu deck server and close modal with true
+              var bitmap = widget.bitmap;
+              var imageData =
+                  await bitmap.toByteData(format: ImageByteFormat.png);
+              var image = IMG.decodeImage(imageData!.buffer.asUint8List());
+              // change the image size to 100 x 100
+              var thumbnail = IMG.copyResize(image!, width: 100, height: 100);
+              var thumbnailImage = IMG.encodeJpg(thumbnail, quality: 100);
+              // resize the image if it is too big
+              if (thumbnailImage.length > 15000) {
+                thumbnailImage = IMG.encodeJpg(thumbnail, quality: 70);
+              }
+              var thumbnailFile = MultipartFile.fromBytes(
+                "image",
+                thumbnailImage,
+                filename: "$filename.jpg",
+              );
+              // replace empty pin with NULL so the server knows it is empty
+              String websocketPin = websocket.pin.toString();
+              if (websocketPin.isEmpty) {
+                websocketPin = "NULL";
+              }
+              bool? upload = await postMacroImage(
+                  kitsuDeck.ip, websocketPin, thumbnailFile);
+
+              if (upload == true) {
+                Navigator.pop(context, true);
+              }
+            },
+            child: const Text("Yes"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<bool?> showMacroImagesUploadConfirmModal(
+    BuildContext context, Image croppedImage, bitmap) async {
+  return await showGeneralDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (BuildContext buildContext, Animation animation,
+        Animation secondaryAnimation) {
+      return MacroImagesUploadConfirmModal(
+          croppedImage: croppedImage, bitmap: bitmap);
     },
   );
 }
