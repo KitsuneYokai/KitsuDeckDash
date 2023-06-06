@@ -1,6 +1,4 @@
-
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -53,7 +51,6 @@ class AddKitsuDeckState extends State<AddKitsuDeck> {
     final kitsuDeck = Provider.of<KitsuDeck>(context);
     final gateway = Provider.of<DeckWebsocket>(context);
     return AlertDialog(
-        // dont close dialog when tapped outside
         title: Row(children: [
           const Text('Add a KitsuDeck'),
           const Spacer(),

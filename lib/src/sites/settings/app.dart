@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../classes/websocket/connector.dart';
-import '../../helper/settingsStorage.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({
@@ -18,9 +14,6 @@ class AppSettingsState extends State<AppSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final sharedPref = SharedPref();
-    final websocket = Provider.of<DeckWebsocket>(context, listen: false);
-
     return Expanded(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,8 +37,8 @@ class AppSettingsState extends State<AppSettings> {
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Column(
-                    children: const [Text("No device added yet")],
+                  child: const Column(
+                    children: [Text("No device added yet")],
                   ))),
         )
       ],

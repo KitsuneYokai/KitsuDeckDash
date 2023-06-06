@@ -1,30 +1,27 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kitsu_deck_dash/src/sites/kitsu_deck/macro/macro_images.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
-
-import '../../../classes/kitsu_deck/device.dart';
-import '../../../classes/websocket/connector.dart';
 
 const List<String> macroActions = <String>["Macro"];
 
-class MacroModal extends StatefulWidget {
-  const MacroModal({super.key});
+class AddMacroModal extends StatefulWidget {
+  const AddMacroModal({super.key});
 
   @override
-  MacroModalState createState() => MacroModalState();
+  AddMacroModalState createState() => AddMacroModalState();
 }
 
-class MacroModalState extends State<MacroModal> {
-  Map _imageB64Return = {};
+class AddMacroModalState extends State<AddMacroModal> {
+  Map _imageReturn = {};
   int macroActionsValue = 0;
   bool isMacroRecording = false;
   List macroRecording = [];
 
+  TextEditingController macroNameController = TextEditingController();
+  TextEditingController macroDescriptionController = TextEditingController();
   void _handleKeyDownEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       // if keys are pressed down then add them to the macroRecording list
@@ -44,9 +41,6 @@ class MacroModalState extends State<MacroModal> {
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
-
     return Padding(
       padding: const EdgeInsets.all(20),
       child: BackdropFilter(
@@ -113,18 +107,20 @@ class MacroModalState extends State<MacroModal> {
                       children: [
                         Expanded(
                           child: Column(
-                            children: const [
+                            children: [
                               TextField(
-                                decoration: InputDecoration(
+                                controller: macroNameController,
+                                decoration: const InputDecoration(
                                   labelText: 'Macro Name',
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               TextField(
+                                controller: macroDescriptionController,
                                 minLines: 3,
                                 maxLines: 3,
                                 maxLength: 500,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   labelText: 'Macro Description',
                                 ),
                               ),
@@ -134,7 +130,7 @@ class MacroModalState extends State<MacroModal> {
                         Expanded(
                           child: Column(
                             children: [
-                              if (_imageB64Return.isEmpty) ...{
+                              if (_imageReturn.isEmpty) ...{
                                 Container(
                                   width: 158,
                                   height: 158,
@@ -169,7 +165,7 @@ class MacroModalState extends State<MacroModal> {
                                             await showMacroImagesModal(
                                                 context, true);
                                         setState(() {
-                                          _imageB64Return = imageData!;
+                                          _imageReturn = imageData!;
                                         });
                                       }),
                                 )
@@ -177,7 +173,7 @@ class MacroModalState extends State<MacroModal> {
                                 SizedBox(
                                     width: 150,
                                     height: 150,
-                                    child: _imageB64Return["image"]),
+                                    child: _imageReturn["image"]),
                                 const SizedBox(height: 10),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
@@ -190,7 +186,7 @@ class MacroModalState extends State<MacroModal> {
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _imageB64Return = {};
+                                      _imageReturn = {};
                                     });
                                   },
                                 )
@@ -382,9 +378,50 @@ class MacroModalState extends State<MacroModal> {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.green,
                                         ),
-                                        onPressed: () {},
-                                        child: Row(
-                                          children: const [
+                                        onPressed: () {
+                                          // remove the listener for the macro recording
+                                          RawKeyboard.instance.removeListener(
+                                              _handleKeyDownEvent);
+                                          setState(() {
+                                            isMacroRecording = false;
+                                          });
+                                          // check if the macro is empty
+                                          if (macroRecording.isEmpty) {
+                                            const snackBar = SnackBar(
+                                              content:
+                                                  Text("Please record a macro"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                          if (macroNameController
+                                              .text.isEmpty) {
+                                            // create a snackbar message
+                                            const snackBar = SnackBar(
+                                              content: Text(
+                                                  "Please enter a macro name"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+
+                                          if (macroRecording.isNotEmpty &&
+                                              macroNameController
+                                                  .text.isNotEmpty) {
+                                            // save the macro
+                                            showAddMacroConfirmModal(
+                                              context,
+                                              macroNameController.text,
+                                              macroDescriptionController.text,
+                                              macroRecording,
+                                              _imageReturn,
+                                            );
+                                          }
+                                        },
+                                        child: const Row(
+                                          children: [
                                             Icon(Icons.save,
                                                 color: Colors.white),
                                             Text(" Save Macro",
@@ -420,7 +457,107 @@ showMacroModal(BuildContext context) {
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return const MacroModal();
+      return const AddMacroModal();
+    },
+  );
+}
+
+class AddMacroConfirmModal extends StatefulWidget {
+  final String macroName;
+  final String macroDescription;
+  final List<dynamic> macroRecording;
+  final Map<dynamic, dynamic> macroImageData;
+
+  const AddMacroConfirmModal(
+      {super.key,
+      required this.macroName,
+      required this.macroDescription,
+      required this.macroRecording,
+      required this.macroImageData});
+
+  @override
+  AddMacroConfirmModalState createState() => AddMacroConfirmModalState();
+}
+
+class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Save Macro?",
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+      content: Column(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            widget.macroImageData["image"],
+            const SizedBox(width: 10),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.macroName,
+                    style: const TextStyle(
+                        fontSize: 25, fontWeight: FontWeight.bold)),
+                Text(widget.macroDescription)
+              ],
+            )
+          ],
+        ),
+        const SizedBox(height: 10),
+        const Text("Macro from left to right:", style: TextStyle(fontSize: 20)),
+        Expanded(
+            child: Wrap(
+          children: [
+            for (var index = 0; index < widget.macroRecording.length; index++)
+              Container(
+                padding: const EdgeInsets.all(5),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white70,
+                  ),
+                  onPressed: null,
+                  child: Text(
+                    widget.macroRecording[index]["key"],
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
+          ],
+        )),
+        // here maybe add a test btn that will run the macro
+      ]),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("No")),
+        TextButton(onPressed: () {}, child: const Text("Yes")),
+      ],
+    );
+  }
+}
+
+showAddMacroConfirmModal(
+    BuildContext context,
+    String name,
+    String macroDescription,
+    List<dynamic> macroRecording,
+    Map<dynamic, dynamic> image) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black45,
+    transitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (BuildContext buildContext, Animation animation,
+        Animation secondaryAnimation) {
+      return AddMacroConfirmModal(
+          macroName: name,
+          macroDescription: macroDescription,
+          macroRecording: macroRecording,
+          macroImageData: image);
     },
   );
 }

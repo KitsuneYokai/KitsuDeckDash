@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../classes/websocket/connector.dart';
-import '../../helper/settingsStorage.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'kitsu_deck.dart';
@@ -21,16 +18,13 @@ class SettingsNavbarState extends State<SettingsNavbar> {
 
   @override
   Widget build(BuildContext context) {
-    final sharedPref = SharedPref();
-    final websocket = Provider.of<DeckWebsocket>(context, listen: false);
-
     return Expanded(
         child: Row(
       children: [
         Container(
           width: 250,
           decoration: BoxDecoration(
-            // add gradient from top left top bottomright
+            // add gradient from top left top bottom right
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -51,7 +45,7 @@ class SettingsNavbarState extends State<SettingsNavbar> {
                 ),
                 child: ListView(children: [
                   ListTile(
-                    title: Row(children: const [
+                    title: const Row(children: [
                       Icon(Icons.keyboard_outlined),
                       Padding(
                         padding: EdgeInsets.only(left: 10),
@@ -68,7 +62,7 @@ class SettingsNavbarState extends State<SettingsNavbar> {
                     ),
                   ),
                   ListTile(
-                    title: Row(children: const [
+                    title: const Row(children: [
                       Icon(Icons.app_registration),
                       Padding(
                         padding: EdgeInsets.only(left: 10),
@@ -85,7 +79,7 @@ class SettingsNavbarState extends State<SettingsNavbar> {
                     ),
                   ),
                   ListTile(
-                    title: Row(children: const [
+                    title: const Row(children: [
                       Icon(Icons.developer_board_rounded),
                       Padding(
                         padding: EdgeInsets.only(left: 10),

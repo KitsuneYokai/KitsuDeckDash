@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'macro.dart';
+import 'add_macro.dart';
 import 'macro_images.dart';
 
 class MacroDashboard extends StatefulWidget {
@@ -57,7 +57,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                           )),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           child: TextButton(
                               onPressed: () async {
                                 Navigator.of(context).pop();

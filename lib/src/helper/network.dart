@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -56,7 +57,9 @@ Future<List<Map>> getKitsuDeckHostname() async {
         ipList.add(result.host);
       }
     }).catchError((error) {
-      print('Error occurred while looking up the host for IP $ip: $error');
+      if (kDebugMode) {
+        print('Error occurred while looking up the host for IP $ip: $error');
+      }
     }));
   }
   await Future.wait(futures);
@@ -95,7 +98,7 @@ getMacroImage(String address, String pin, String name) async {
   try {
     // make a post request to the ip
     final response = await http.post(url,
-        body: jsonEncode({"auth_pin": "$pin", "name": "$name"}),
+        body: jsonEncode({"auth_pin": pin, "name": name}),
         headers: {"Content-Type": "application/json"});
     if (response.statusCode == 200) {
       return response.bodyBytes;
@@ -110,21 +113,18 @@ getMacroImage(String address, String pin, String name) async {
 Future<bool> postMacroImage(
     String address, String pin, http.MultipartFile image) async {
   final url = Uri.parse('http://$address/postMacroImage');
-  print(url);
   try {
     final request = http.MultipartRequest('POST', url);
     request.headers['Content-Type'] =
         'multipart/form-data'; // Set the correct content-type
     request.files.add(image);
-    request.fields.addAll({'auth_pin': "$pin"});
+    request.fields.addAll({'auth_pin': pin});
     // print all fields
-    print(request.fields);
     final response = await request.send();
     if (response.statusCode == 200) {
       // TODO: check if the image was uploaded successfully
       return true;
     } else {
-      print(response.statusCode);
       return false;
     }
   } catch (e) {

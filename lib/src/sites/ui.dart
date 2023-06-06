@@ -86,7 +86,7 @@ class MainViewState extends State<MainView> with WindowListener {
         children: [
           Container(
             decoration: BoxDecoration(
-              // add gradient from top left top bottomright
+              // add gradient from top left top bottom right
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -137,7 +137,7 @@ class MainViewState extends State<MainView> with WindowListener {
                       child: const Icon(Icons.crop_square)),
                   //close button
                   TextButton(
-                    child: Icon(Icons.close, color: Colors.white),
+                    child: const Icon(Icons.close, color: Colors.white),
                     onPressed: () async {
                       // will just hide the program to the tray
                       await windowManager.hide();
@@ -156,7 +156,7 @@ class MainViewState extends State<MainView> with WindowListener {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        // add gradient from top left top bottomright
+                        // add gradient from top left top bottom right
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,

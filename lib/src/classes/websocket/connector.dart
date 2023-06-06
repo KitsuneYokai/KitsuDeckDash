@@ -56,8 +56,8 @@ class DeckWebsocket extends ChangeNotifier {
   void connect(String url) {
     try {
       _streamController = StreamController.broadcast();
-      _webSocketChannel =
-          IOWebSocketChannel.connect(url, pingInterval: Duration(seconds: 5));
+      _webSocketChannel = IOWebSocketChannel.connect(url,
+          pingInterval: const Duration(seconds: 5));
       _webSocketChannel.stream.listen(
         (data) {
           if (!_isConnected) {

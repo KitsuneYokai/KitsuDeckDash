@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -518,7 +517,7 @@ class MacroImagesUploadConfirmModalState
           TextButton(
             onPressed: () async {
               // TODO: add more image formats (final supported formats: jpg, png, bmp and maybe gif) also i will check how the .bin files are generated on the LVGL image converter site,
-              // and implement the same thing here, because the .bin files are loaded faster by the LVGL library
+              // TODO: and implement the same thing here, because the .bin files are loaded faster by the LVGL library
 
               var filename = getRandomString(10);
               // upload to kitsu deck server and close modal with true

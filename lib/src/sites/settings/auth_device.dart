@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../classes/kitsu_deck/device.dart';
@@ -17,14 +13,12 @@ class AuthKitsuDeck extends StatefulWidget {
 }
 
 class AuthKitsuDeckState extends State<AuthKitsuDeck> {
-  int _selectedIndex = 0;
-  TextEditingController _pinConfigController = TextEditingController();
+  final TextEditingController _pinConfigController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final kitsuDeck = Provider.of<KitsuDeck>(context);
     final websocket = Provider.of<DeckWebsocket>(context);
     return AlertDialog(
-        // dont close dialog when tapped outside
         title: Row(children: [
           const Text('Authenticate'),
           const Spacer(),

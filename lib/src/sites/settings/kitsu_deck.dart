@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
-import '../../helper/settingsStorage.dart';
 import 'auth_device.dart';
 import 'no_device.dart';
 
@@ -225,9 +224,9 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                           ),
-                          child: Row(
+                          child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 Icon(Icons.delete, color: Colors.white),
                                 Text("Remove KitsuDeck",
                                     style: TextStyle(color: Colors.white)),
