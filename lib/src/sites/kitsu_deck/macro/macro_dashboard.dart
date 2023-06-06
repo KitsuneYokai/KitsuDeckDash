@@ -1,16 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../classes/kitsu_deck/device.dart';
-import '../../../classes/websocket/connector.dart';
-import '../../../helper/network.dart';
 import 'macro.dart';
+import 'macro_images.dart';
 
 class MacroDashboard extends StatefulWidget {
   const MacroDashboard({super.key});
@@ -22,8 +16,6 @@ class MacroDashboard extends StatefulWidget {
 class MacroDashboardState extends State<MacroDashboard> {
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
     return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Scaffold(
@@ -54,7 +46,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                             height: 55,
                             child: Padding(
                               padding: EdgeInsets.all(10),
-                              child: const Text(
+                              child: Text(
                                 "Macro Dashboard",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -74,15 +66,21 @@ class MacroDashboardState extends State<MacroDashboard> {
                         )
                       ],
                     ),
-                    Text("HERE SHOW MACROS MAYBE?"),
+                    const Text("HERE SHOW MACROS MAYBE?"),
 
                     // TODO: layout
                     IconButton(
-                      icon: Icon(Icons.add),
+                      icon: const Icon(Icons.add),
                       onPressed: () {
                         showMacroModal(context);
                       },
-                    )
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.image),
+                      onPressed: () {
+                        showMacroImagesModal(context, false);
+                      },
+                    ),
                   ],
                 )),
           ),

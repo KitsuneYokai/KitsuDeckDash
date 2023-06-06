@@ -17,7 +17,8 @@ import '../../../classes/websocket/connector.dart';
 import '../../../helper/network.dart';
 
 class MacroImagesModal extends StatefulWidget {
-  const MacroImagesModal({super.key});
+  const MacroImagesModal({super.key, required this.isSelectable});
+  final bool isSelectable;
 
   @override
   MacroImagesModalState createState() => MacroImagesModalState();
@@ -30,6 +31,7 @@ class MacroImagesModalState extends State<MacroImagesModal> {
 
   List _kitsuDeckMacroImages = [];
   Map _imageB64Return = {};
+
   @override
   Widget build(BuildContext context) {
     final kitsuDeck = Provider.of<KitsuDeck>(context);
@@ -44,33 +46,58 @@ class MacroImagesModalState extends State<MacroImagesModal> {
       websocket.stream.firstWhere((event) {
         Map jsonData = jsonDecode(event);
         if (jsonData["event"] == "GET_MACRO_IMAGES") {
-          setState(() {
-            _isLoaded = true;
-            _isLoading = false;
-            if (jsonData["images"] != null) {
-              for (var image in jsonData["images"]) {
-                getMacroImage(kitsuDeck.ip, websocket.pin, image["name"])
-                    .then((value) {
-                  var imageData = Image.memory(
-                    value,
+          if (jsonData["images"].length > 0) {
+            for (var image in jsonData["images"]) {
+              // delay loading of next image
+              Future.delayed(const Duration(seconds: 1), () async {
+                var imageData = await getMacroImage(
+                    kitsuDeck.ip, websocket.pin, image["name"]);
+                // make a image with rounded corners
+                if (imageData == null || imageData == false) {
+                  // create a empty image
+                  imageData = IMG.Image(width: 100, height: 100);
+                  IMG.fill(imageData, color: IMG.ColorInt16(0x000000));
+                  imageData = IMG.encodeJpg(imageData);
+                }
+
+                imageData = ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Image.memory(
+                    imageData,
                     fit: BoxFit.cover,
-                  );
+                  ),
+                );
+
+                if (mounted) {
                   setState(() {
                     _kitsuDeckMacroImages.add({
                       "id": image["id"],
                       "name": image["name"],
                       "image": imageData,
                     });
+                    if (jsonData["images"].indexOf(image) ==
+                        jsonData["images"].length - 1) {
+                      _isLoaded = true;
+                      _isLoading = false;
+                    }
                   });
-                });
-              }
+                }
+              });
             }
-          });
+          } else {
+            if (mounted) {
+              setState(() {
+                _isLoaded = true;
+                _isLoading = false;
+              });
+            }
+          }
           return true;
         }
         return false;
       });
     }
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: BackdropFilter(
@@ -133,54 +160,94 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                       ),
                     ],
                   ),
-                  for (var image in _kitsuDeckMacroImages) ...{
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: _imageB64Return["id"] == image["id"]
-                            ? Border.all(
-                                color: Theme.of(context).colorScheme.secondary,
+                  Expanded(
+                      child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 10,
+                      spacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: Colors.grey[400]!,
                                 width: 5,
-                              )
-                            : Border.all(
-                                color: Colors.transparent,
-                                width: 5,
+                              )),
+                          child: InkWell(
+                            child: const Icon(Icons.add),
+                            onTap: () async {
+                              bool? result =
+                                  await showMacroImagesUploadModal(context);
+                              if (result != null && result) {
+                                setState(() {
+                                  _kitsuDeckMacroImages = [];
+                                  _isLoaded = false;
+                                  _isLoading = false;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        for (var image in _kitsuDeckMacroImages) ...{
+                          Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                border: _imageB64Return["id"] == image["id"] &&
+                                        widget.isSelectable
+                                    ? Border.all(
+                                        color: Colors.white,
+                                        width: 5,
+                                      )
+                                    : Border.all(
+                                        color: Colors.transparent,
+                                        width: 5,
+                                      ),
                               ),
-                      ),
-                      child: InkWell(
-                          child: image["image"],
-                          onTap: () {
-                            setState(() {
-                              _imageB64Return = image;
-                            });
-                          }),
-                    )
-                  },
-                  const Spacer(),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(15),
+                                child: image["image"],
+                                onTap: widget.isSelectable
+                                    ? () {
+                                        setState(() {
+                                          _imageB64Return = image;
+                                        });
+                                      }
+                                    : null,
+                              )),
+                        },
+                        if (_isLoading) ...{
+                          const SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        },
+                      ],
+                    ),
+                  )),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Row(
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            showMacroImagesUploadModal(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary),
-                          child: const Text("Upload"),
-                        ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context, _imageB64Return);
-                          },
-                          style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.green),
-                          child: const Text("Select"),
-                        ),
+                        if (widget.isSelectable) ...{
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context, _imageB64Return);
+                            },
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.green),
+                            child: const Text("Select"),
+                          ),
+                        }
                       ],
                     ),
                   )
@@ -194,16 +261,18 @@ class MacroImagesModalState extends State<MacroImagesModal> {
   }
 }
 
-Future<Map?> showMacroImagesModal(BuildContext context) async {
+Future<Map?> showMacroImagesModal(
+    BuildContext context, bool isSelectable) async {
   return await showGeneralDialog<Map>(
     context: context,
     barrierDismissible: false,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: Colors.transparent,
+    barrierColor:
+        isSelectable ? Colors.transparent : Colors.black.withOpacity(0.5),
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return const MacroImagesModal();
+      return MacroImagesModal(isSelectable: isSelectable);
     },
   );
 }
@@ -294,10 +363,7 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           // make border gradient
-                          color: Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withOpacity(0.4),
+                          color: Colors.grey[400]!,
                           width: 5,
                         ),
                       ),
@@ -328,6 +394,7 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
                         ),
                       ),
                     ),
+                    // ignore: prefer_const_constructors
                     Spacer(),
                   },
                   if (_image != null)
@@ -366,11 +433,12 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
                                       await imageCropController.croppedImage();
                                   var bitmap =
                                       await imageCropController.croppedBitmap();
-
                                   bool? upload =
                                       await showMacroImagesUploadConfirmModal(
                                           context, croppedImage, bitmap);
-                                  print(upload);
+                                  if (upload != null && upload) {
+                                    Navigator.pop(context, true);
+                                  }
                                 }
                               : null,
                           style: ElevatedButton.styleFrom(
@@ -449,8 +517,9 @@ class MacroImagesUploadConfirmModalState
           ),
           TextButton(
             onPressed: () async {
-              // TODO: add more image formats (final supported formats: jpg, png, bmp and maybe gif)
-              // generate random filename it should be numbers and letters and not datetime
+              // TODO: add more image formats (final supported formats: jpg, png, bmp and maybe gif) also i will check how the .bin files are generated on the LVGL image converter site,
+              // and implement the same thing here, because the .bin files are loaded faster by the LVGL library
+
               var filename = getRandomString(10);
               // upload to kitsu deck server and close modal with true
               var bitmap = widget.bitmap;

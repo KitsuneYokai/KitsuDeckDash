@@ -166,7 +166,8 @@ class MacroModalState extends State<MacroModal> {
                                       ),
                                       onTap: () async {
                                         final imageData =
-                                            await showMacroImagesModal(context);
+                                            await showMacroImagesModal(
+                                                context, true);
                                         setState(() {
                                           _imageB64Return = imageData!;
                                         });
