@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '../../helper/settingsStorage.dart';
+import '../../helper/settings_storage.dart';
 
 class KitsuDeck extends ChangeNotifier {
   late String _hostname;

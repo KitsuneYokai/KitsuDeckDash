@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
-import '../../helper/settingsStorage.dart';
 import '../settings/no_device.dart';
 import 'macro/macro_dashboard.dart';
 
@@ -19,7 +18,6 @@ class KitsuDeckDashboard extends StatefulWidget {
 class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
   @override
   Widget build(BuildContext context) {
-    final sharedPref = SharedPref();
     final kitsuDeck = Provider.of<KitsuDeck>(context);
     final websocket = Provider.of<DeckWebsocket>(context);
 
