@@ -1,11 +1,20 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kitsu_deck_dash/src/sites/kitsu_deck/macro/macro_images.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../classes/websocket/connector.dart';
+
 const List<String> macroActions = <String>["Macro"];
+
+// macro Types definitions, is used in the deck to know what type of macro it is
+int macroAction = 0; // macro = keyboard key emulation (Hello world)
+int fnAction = 1; // fn = function key emulation (F1-F...)
+int programAction = 2; // program = open program (Open Chrome)
 
 class AddMacroModal extends StatefulWidget {
   const AddMacroModal({super.key});
@@ -218,7 +227,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                       );
                     }).toList(),
                   ),
-                  if (macroActionsValue == 0) ...{
+                  if (macroActionsValue == macroAction) ...{
                     Expanded(
                       child: Padding(
                         padding:
@@ -406,13 +415,13 @@ class AddMacroModalState extends State<AddMacroModal> {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(snackBar);
                                           }
-
                                           if (macroRecording.isNotEmpty &&
                                               macroNameController
                                                   .text.isNotEmpty) {
                                             // save the macro
                                             showAddMacroConfirmModal(
                                               context,
+                                              macroActionsValue,
                                               macroNameController.text,
                                               macroDescriptionController.text,
                                               macroRecording,
@@ -463,6 +472,7 @@ showMacroModal(BuildContext context) {
 }
 
 class AddMacroConfirmModal extends StatefulWidget {
+  final int macroAction;
   final String macroName;
   final String macroDescription;
   final List<dynamic> macroRecording;
@@ -470,6 +480,7 @@ class AddMacroConfirmModal extends StatefulWidget {
 
   const AddMacroConfirmModal(
       {super.key,
+      required this.macroAction,
       required this.macroName,
       required this.macroDescription,
       required this.macroRecording,
@@ -482,6 +493,28 @@ class AddMacroConfirmModal extends StatefulWidget {
 class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
   @override
   Widget build(BuildContext context) {
+    final websocket = Provider.of<DeckWebsocket>(context);
+    if (websocket.isConnected) {
+      websocket.stream.firstWhere(
+        (event) {
+          Map jsonData = jsonDecode(event);
+          if (jsonData["event"] == "CREATE_MACRO" && jsonData["status"]) {
+            Navigator.pop(context, true);
+            return true;
+          } else if (jsonData["event"] == "CREATE_MACRO" &&
+              !jsonData["status"]) {
+            SnackBar snackBar = SnackBar(
+              content: jsonData["message"],
+              duration: const Duration(seconds: 3),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            Navigator.pop(context, false);
+            return true;
+          }
+          return false;
+        },
+      );
+    }
     return AlertDialog(
       title: const Text("Save Macro?",
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
@@ -533,19 +566,35 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
               Navigator.of(context).pop();
             },
             child: const Text("No")),
-        TextButton(onPressed: () {}, child: const Text("Yes")),
+        TextButton(
+            onPressed: () {
+              // send a macro creation event to the server
+              websocket.send(jsonEncode({
+                "event": "CREATE_MACRO",
+                "auth_pin": websocket.pin,
+                "macro_name": widget.macroName,
+                "macro_description": widget.macroDescription,
+                "macro_action": {
+                  "type": widget.macroAction,
+                  "action": widget.macroRecording
+                },
+                "macro_image_id": widget.macroImageData["id"]
+              }));
+            },
+            child: const Text("Yes")),
       ],
     );
   }
 }
 
-showAddMacroConfirmModal(
+Future<bool?> showAddMacroConfirmModal(
     BuildContext context,
+    int macroAction,
     String name,
     String macroDescription,
     List<dynamic> macroRecording,
-    Map<dynamic, dynamic> image) {
-  showGeneralDialog(
+    Map<dynamic, dynamic> image) async {
+  return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -554,6 +603,7 @@ showAddMacroConfirmModal(
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
       return AddMacroConfirmModal(
+          macroAction: macroAction,
           macroName: name,
           macroDescription: macroDescription,
           macroRecording: macroRecording,

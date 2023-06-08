@@ -72,7 +72,23 @@ class MacroDashboardState extends State<MacroDashboard> {
                     IconButton(
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        showMacroModal(context);
+                        bool result = showMacroModal(context);
+                        if (result) {
+                          SnackBar snackBar = const SnackBar(
+                            content: Text("Macro added!"),
+                            duration: Duration(seconds: 1),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          setState(() {
+                            // TODO: reload the page
+                          });
+                        } else {
+                          SnackBar snackBar = const SnackBar(
+                            content: Text("Error adding macro!"),
+                            duration: Duration(seconds: 1),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
                       },
                     ),
                     IconButton(
