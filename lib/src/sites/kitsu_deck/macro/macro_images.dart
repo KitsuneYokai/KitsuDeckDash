@@ -145,7 +145,7 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                                 children: [
                                   Spacer(),
                                   Text(
-                                    "Macro images",
+                                    "Macro Images",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 25,

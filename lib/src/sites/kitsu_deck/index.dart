@@ -86,16 +86,6 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                                 const Text("Macros"),
                               ],
                             ),
-                            Column(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.bar_chart),
-                                  onPressed:
-                                      websocket.isConnected ? null : null,
-                                ),
-                                const Text("Stats"),
-                              ],
-                            ),
                           ],
                         ),
                       ],

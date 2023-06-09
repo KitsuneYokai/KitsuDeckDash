@@ -193,9 +193,7 @@ class MainViewState extends State<MainView> with WindowListener {
                         },
                       ),
                     ),
-
                     // background color of the row
-
                     if (_selectedIndex == 0)
                       const KitsuDeckDashboard()
                     else if (_selectedIndex == 1)

@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'add_macro.dart';
 import 'macro_images.dart';
+import 'macro_layout.dart';
 
 class MacroDashboard extends StatefulWidget {
   const MacroDashboard({super.key});
@@ -36,6 +37,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                   ),
                 ),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
                       children: [
@@ -66,37 +68,56 @@ class MacroDashboardState extends State<MacroDashboard> {
                         )
                       ],
                     ),
-                    const Text("HERE SHOW MACROS MAYBE?"),
-
-                    // TODO: layout
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        bool result = showMacroModal(context);
-                        if (result) {
-                          SnackBar snackBar = const SnackBar(
-                            content: Text("Macro added!"),
-                            duration: Duration(seconds: 1),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          setState(() {
-                            // TODO: reload the page
-                          });
-                        } else {
-                          SnackBar snackBar = const SnackBar(
-                            content: Text("Error adding macro!"),
-                            duration: Duration(seconds: 1),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.image),
-                      onPressed: () {
-                        showMacroImagesModal(context, false);
-                      },
-                    ),
+                    const Expanded(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 10, right: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                    "Here will be a list of all your macros, + a search bar")
+                              ],
+                            ))),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                              onPressed: () async {
+                                bool? result = await showMacroModal(context);
+                                if (result! == true) {
+                                  SnackBar snackBar = const SnackBar(
+                                    content: Text("Macro added!"),
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                }
+                              },
+                              child: const Row(children: [
+                                Icon(Icons.add),
+                                Text("Add Macro")
+                              ])),
+                          TextButton(
+                              onPressed: () {
+                                showMacroImagesModal(context, false);
+                              },
+                              child: const Row(children: [
+                                Icon(Icons.image_search_outlined),
+                                Text("Macro Images")
+                              ])),
+                          TextButton(
+                              onPressed: () {
+                                showMacroLayoutEditorModal(context);
+                              },
+                              child: const Row(children: [
+                                Icon(Icons.grid_view),
+                                Text("Layout")
+                              ])),
+                        ],
+                      ),
+                    )
                   ],
                 )),
           ),

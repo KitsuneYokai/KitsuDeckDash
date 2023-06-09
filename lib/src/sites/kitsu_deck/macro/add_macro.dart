@@ -102,7 +102,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                               RawKeyboard.instance
                                   .removeListener(_handleKeyDownEvent);
                             }
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(false);
                           },
                           child: const Icon(Icons.close),
                         ),
@@ -387,7 +387,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.green,
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // remove the listener for the macro recording
                                           RawKeyboard.instance.removeListener(
                                               _handleKeyDownEvent);
@@ -419,7 +419,8 @@ class AddMacroModalState extends State<AddMacroModal> {
                                               macroNameController
                                                   .text.isNotEmpty) {
                                             // save the macro
-                                            showAddMacroConfirmModal(
+                                            bool? result =
+                                                await showAddMacroConfirmModal(
                                               context,
                                               macroActionsValue,
                                               macroNameController.text,
@@ -427,6 +428,10 @@ class AddMacroModalState extends State<AddMacroModal> {
                                               macroRecording,
                                               _imageReturn,
                                             );
+                                            if (result != null &&
+                                                result == true) {
+                                              Navigator.pop(context, true);
+                                            }
                                           }
                                         },
                                         child: const Row(
@@ -457,8 +462,8 @@ class AddMacroModalState extends State<AddMacroModal> {
   }
 }
 
-showMacroModal(BuildContext context) {
-  showGeneralDialog(
+Future<bool?> showMacroModal(BuildContext context) async {
+  return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -498,7 +503,8 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
       websocket.stream.firstWhere(
         (event) {
           Map jsonData = jsonDecode(event);
-          if (jsonData["event"] == "CREATE_MACRO" && jsonData["status"]) {
+          if (jsonData["event"] == "CREATE_MACRO" &&
+              jsonData["status"] == true) {
             Navigator.pop(context, true);
             return true;
           } else if (jsonData["event"] == "CREATE_MACRO" &&
