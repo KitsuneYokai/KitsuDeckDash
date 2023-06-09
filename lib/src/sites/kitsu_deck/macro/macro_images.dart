@@ -29,7 +29,13 @@ class MacroImagesModalState extends State<MacroImagesModal> {
   bool _isLoading = false;
 
   List _kitsuDeckMacroImages = [];
+
   Map _imageB64Return = {};
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +186,8 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                           child: InkWell(
                             child: const Icon(Icons.add),
                             onTap: () async {
+                              _kitsuDeckMacroImages.clear();
+
                               bool? result =
                                   await showMacroImagesUploadModal(context);
                               if (result != null && result) {

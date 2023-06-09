@@ -40,13 +40,15 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
         websocket.stream.firstWhere((event) {
           Map jsonData = jsonDecode(event);
           if (jsonData["event"] == "GET_BRIGHTNESS") {
-            setState(() {
-              _brightness = jsonData["value"] / 255 * 100;
-              if (_brightness < 10) {
-                _brightness = 10;
-              }
-              _isInit = true;
-            });
+            if (mounted) {
+              setState(() {
+                _brightness = jsonData["value"] / 255 * 100;
+                if (_brightness < 10) {
+                  _brightness = 10;
+                }
+                _isInit = true;
+              });
+            }
             return true;
           }
           return false;

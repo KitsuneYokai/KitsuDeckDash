@@ -39,15 +39,18 @@ flutter:
   assets:
     # Add assets from the images directory to the application.
     - assets/images/
+    - assets/images/macro_icon.jpg
+    - assets/images/app_icon.png
+    - assets/images/app_icon.ico
 
 flutter_icons:
   windows:
     generate: true
-    image_path: "assets/images/flutter_logo.png"
+    image_path: "assets/images/app_icon.png"
     icon_size: 48 # min:48, max:256, default: 48
     adaptive_icon_background: "#FFFFFF" # default: #FFFFFF
   macos:
     generate: true
-    image_path: "assets/images/flutter_logo.png"
+    image_path: "assets/images/app_icon.png"
     icon_size: 48 # min:48, max:256, default: 48
     adaptive_icon_background: "#FFFFFF" # default: #FFFFFF

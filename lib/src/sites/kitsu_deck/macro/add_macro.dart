@@ -529,18 +529,30 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            widget.macroImageData["image"],
-            const SizedBox(width: 10),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.macroName,
-                    style: const TextStyle(
-                        fontSize: 25, fontWeight: FontWeight.bold)),
-                Text(widget.macroDescription)
-              ],
-            )
+            if (widget.macroImageData["image"] != null)
+              widget.macroImageData["image"],
+            if (widget.macroImageData["image"] == null)
+              // load image from assets
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Image.asset(
+                  "assets/images/macro_icon.jpg", // "assets/images/app_icon.png
+                  width: 100,
+                  height: 100,
+                ),
+              ),
+            Padding(
+                padding: EdgeInsets.only(left: 10, right: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.macroName,
+                        style: const TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.bold)),
+                    Text(widget.macroDescription)
+                  ],
+                )),
           ],
         ),
         const SizedBox(height: 10),
