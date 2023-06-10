@@ -174,8 +174,20 @@ class MacroDashboardState extends State<MacroDashboard> {
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           onTap: () async {
-                                            showMacroInfoModal(context, macro,
-                                                kitsuDeckMacroImages);
+                                            bool? result =
+                                                await showMacroInfoModal(
+                                                    context,
+                                                    macro,
+                                                    kitsuDeckMacroImages);
+                                            if (result != null && result) {
+                                              setState(() {
+                                                isSent = false;
+                                                isMacroLoaded = false;
+                                                macroData = [];
+                                                isMacroImageLoaded = false;
+                                                kitsuDeckMacroImages = [];
+                                              });
+                                            }
                                             // TODO: handle macroInfoModal return
                                           },
                                           child: Stack(children: [
@@ -445,7 +457,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               Widget image = ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
                 child: Image.asset(
@@ -461,7 +473,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                 }
               }
 
-              showMacroModal(
+              bool? result = await showMacroModal(
                   context,
                   macroData["id"],
                   macroData["name"],
@@ -470,6 +482,9 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                   jsonDecode(macroData["action"])["type"],
                   image,
                   macroData["image"]);
+              if (result != null && result) {
+                Navigator.of(context).pop(true);
+              }
             },
             child: const Text("Edit")),
       ],

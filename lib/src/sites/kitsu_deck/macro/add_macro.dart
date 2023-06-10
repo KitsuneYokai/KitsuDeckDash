@@ -474,6 +474,14 @@ class AddMacroModalState extends State<AddMacroModal> {
                                               );
                                               if (result != null &&
                                                   result == true) {
+                                                SnackBar snackBar = SnackBar(
+                                                  content: Text(
+                                                      "Macro saved successfully"),
+                                                  duration:
+                                                      Duration(seconds: 3),
+                                                );
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(snackBar);
                                                 Navigator.pop(context, true);
                                               }
                                             }
@@ -646,6 +654,20 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
             Navigator.pop(context, false);
             return true;
           }
+          if (jsonData["event"] == "EDIT_MACRO" && jsonData["status"] == true) {
+            Navigator.pop(context, true);
+            return true;
+          } else if (jsonData["event"] == "UPDATE_MACRO" &&
+              !jsonData["status"]) {
+            SnackBar snackBar = SnackBar(
+              content: jsonData["message"],
+              duration: const Duration(seconds: 3),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            Navigator.pop(context, false);
+            return true;
+          }
+
           return false;
         },
       );
