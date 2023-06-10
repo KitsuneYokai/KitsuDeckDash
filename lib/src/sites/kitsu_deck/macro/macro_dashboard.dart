@@ -173,8 +173,10 @@ class MacroDashboardState extends State<MacroDashboard> {
                                         InkWell(
                                           borderRadius:
                                               BorderRadius.circular(10),
-                                          onTap: () {
-                                            // TODO: open macro editor
+                                          onTap: () async {
+                                            showMacroInfoModal(context, macro,
+                                                kitsuDeckMacroImages);
+                                            // TODO: handle macroInfoModal return
                                           },
                                           child: Stack(children: [
                                             Column(
@@ -318,6 +320,177 @@ showMacroDashboard(BuildContext context) {
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
       return const MacroDashboard();
+    },
+  );
+}
+
+class MacroInfoModal extends StatefulWidget {
+  final Map macro;
+  final List macroImages;
+  const MacroInfoModal(
+      {super.key, required this.macro, required this.macroImages});
+
+  @override
+  MacroInfoModalState createState() => MacroInfoModalState();
+}
+
+class MacroInfoModalState extends State<MacroInfoModal> {
+  bool isLoaded = false;
+  bool isSent = false;
+  Map macroData = {};
+  @override
+  Widget build(BuildContext context) {
+    final websocket = Provider.of<DeckWebsocket>(context);
+    if (websocket.isConnected && !isLoaded && mounted) {
+      if (!isSent) {
+        websocket.send(jsonEncode({
+          "event": "GET_MACRO",
+          "auth_pin": websocket.pin,
+          "macro_id": widget.macro["id"],
+        }));
+        setState(() {
+          isSent = true;
+        });
+      }
+      websocket.stream.firstWhere((value) {
+        Map data = jsonDecode(value);
+        if (data["event"] == "GET_MACRO" && !isLoaded) {
+          if (data["status"] == true) {
+            if (mounted) {
+              setState(() {
+                isLoaded = true;
+                macroData = data["macro"];
+              });
+            }
+          }
+        }
+        return false;
+      });
+    }
+    return AlertDialog(
+      content: Column(children: [
+        Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (widget.macro["image"] == null ||
+                  widget.macro["image"] == null.toString()) ...{
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Image.asset(
+                    "assets/images/macro_icon.jpg",
+                    fit: BoxFit.cover,
+                  ),
+                )
+              } else ...{
+                if (widget.macroImages.isNotEmpty) ...{
+                  for (var image in widget.macroImages)
+                    if (image["id"] == widget.macro["image"]) ...{
+                      image["image"]
+                    }
+                } else ...{
+                  const SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Center(child: CircularProgressIndicator()))
+                }
+              },
+              Column(
+                children: [
+                  Text(widget.macro["name"],
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(macroData["description"] ?? "No description"),
+                ],
+              ),
+            ]),
+        const SizedBox(height: 10),
+        if (macroData.isNotEmpty) ...{
+          if (jsonDecode(macroData["action"])["type"] == 0)
+            const Text("Type: Macro", style: TextStyle(fontSize: 20)),
+          const Text("From left to right:", style: TextStyle(fontSize: 20)),
+          Flexible(
+              child: Wrap(
+            children: [
+              for (var index = 0;
+                  index < jsonDecode(macroData["action"])["action"].length;
+                  index++)
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white70,
+                    ),
+                    onPressed: null,
+                    child: Text(
+                      jsonDecode(macroData["action"])["action"][index]["key"],
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+            ],
+          )),
+          Text("Invoked: ${macroData["invoked"]}")
+        },
+      ]),
+      actionsAlignment: MainAxisAlignment.spaceEvenly,
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Close")),
+        ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Widget image = ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Image.asset(
+                  "assets/images/macro_icon.jpg", // "assets/images/app_icon.png
+                  width: 100,
+                  height: 100,
+                ),
+              );
+
+              for (var img in widget.macroImages) {
+                if (img["id"] == macroData["image"]) {
+                  image = img["image"];
+                }
+              }
+
+              showMacroModal(
+                  context,
+                  macroData["id"],
+                  macroData["name"],
+                  macroData["description"],
+                  jsonDecode(macroData["action"])["action"],
+                  jsonDecode(macroData["action"])["type"],
+                  image,
+                  macroData["image"]);
+            },
+            child: const Text("Edit")),
+      ],
+    );
+  }
+}
+
+Future<bool?> showMacroInfoModal(
+    BuildContext context, Map macro, List macroImages) async {
+  return await showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black45,
+    transitionDuration: const Duration(milliseconds: 400),
+    pageBuilder: (BuildContext buildContext, Animation animation,
+        Animation secondaryAnimation) {
+      return MacroInfoModal(
+        macro: macro,
+        macroImages: macroImages,
+      );
     },
   );
 }

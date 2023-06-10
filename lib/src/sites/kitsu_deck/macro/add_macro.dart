@@ -17,13 +17,52 @@ int fnAction = 1; // fn = function key emulation (F1-F...)
 int programAction = 2; // program = open program (Open Chrome)
 
 class AddMacroModal extends StatefulWidget {
-  const AddMacroModal({super.key});
+  final String? macroId;
+  final String? macroName;
+  final String? macroDescription;
+  final List? macroRecording;
+  final int? macroType;
+  final Widget? imageData;
+  final String? imageId;
+
+  const AddMacroModal(
+      {super.key,
+      this.macroId,
+      this.macroName,
+      this.macroDescription,
+      this.macroRecording,
+      this.macroType,
+      this.imageData,
+      this.imageId});
 
   @override
   AddMacroModalState createState() => AddMacroModalState();
 }
 
 class AddMacroModalState extends State<AddMacroModal> {
+  // init state if macro is being edited
+  bool isEditingMode = false;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.macroName != null) {
+      macroNameController.text = widget.macroName!;
+      isEditingMode = true;
+    }
+    if (widget.macroDescription != null) {
+      macroDescriptionController.text = widget.macroDescription!;
+    }
+    if (widget.macroRecording != null) {
+      macroRecording = widget.macroRecording!;
+    }
+    if (widget.macroType != null) {
+      macroAction = widget.macroType!;
+    }
+    if (widget.imageData != null) {
+      _imageReturn = {"image": widget.imageData!};
+    }
+  }
+
   Map _imageReturn = {};
   int macroActionsValue = 0;
   bool isMacroRecording = false;
@@ -76,16 +115,16 @@ class AddMacroModalState extends State<AddMacroModal> {
                 children: [
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: DragToMoveArea(
                           child: SizedBox(
                             width: double.infinity,
                             height: 55,
                             child: Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               child: Text(
-                                "Add Macro",
-                                style: TextStyle(
+                                isEditingMode ? "Edit Macro" : "Add Macro",
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 25,
                                 ),
@@ -381,69 +420,139 @@ class AddMacroModalState extends State<AddMacroModal> {
                               Row(
                                 children: [
                                   const Spacer(),
-                                  Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.green,
-                                        ),
-                                        onPressed: () async {
-                                          // remove the listener for the macro recording
-                                          RawKeyboard.instance.removeListener(
-                                              _handleKeyDownEvent);
-                                          setState(() {
-                                            isMacroRecording = false;
-                                          });
-                                          // check if the macro is empty
-                                          if (macroRecording.isEmpty) {
-                                            const snackBar = SnackBar(
-                                              content:
-                                                  Text("Please record a macro"),
-                                              duration: Duration(seconds: 3),
-                                            );
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(snackBar);
-                                          }
-                                          if (macroNameController
-                                              .text.isEmpty) {
-                                            // create a snackbar message
-                                            const snackBar = SnackBar(
-                                              content: Text(
-                                                  "Please enter a macro name"),
-                                              duration: Duration(seconds: 3),
-                                            );
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(snackBar);
-                                          }
-                                          if (macroRecording.isNotEmpty &&
-                                              macroNameController
-                                                  .text.isNotEmpty) {
-                                            // save the macro
-                                            bool? result =
-                                                await showAddMacroConfirmModal(
-                                              context,
-                                              macroActionsValue,
-                                              macroNameController.text,
-                                              macroDescriptionController.text,
-                                              macroRecording,
-                                              _imageReturn,
-                                            );
-                                            if (result != null &&
-                                                result == true) {
-                                              Navigator.pop(context, true);
+                                  if (isEditingMode)
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                          onPressed: () async {
+                                            // remove the listener for the macro recording
+                                            RawKeyboard.instance.removeListener(
+                                                _handleKeyDownEvent);
+                                            setState(() {
+                                              isMacroRecording = false;
+                                            });
+                                            // check if the macro is empty
+                                            if (macroRecording.isEmpty) {
+                                              const snackBar = SnackBar(
+                                                content: Text(
+                                                    "Please record a macro"),
+                                                duration: Duration(seconds: 3),
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
                                             }
-                                          }
-                                        },
-                                        child: const Row(
-                                          children: [
-                                            Icon(Icons.save,
-                                                color: Colors.white),
-                                            Text(" Save Macro",
-                                                style: TextStyle(
-                                                    color: Colors.white))
-                                          ],
-                                        )),
-                                  ),
+                                            if (macroNameController
+                                                .text.isEmpty) {
+                                              // create a snackbar message
+                                              const snackBar = SnackBar(
+                                                content: Text(
+                                                    "Please enter a macro name"),
+                                                duration: Duration(seconds: 3),
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
+                                            }
+                                            if (macroRecording.isNotEmpty &&
+                                                macroNameController
+                                                    .text.isNotEmpty) {
+                                              print(widget.imageId);
+                                              // save the macro
+                                              bool? result =
+                                                  await showAddMacroConfirmModal(
+                                                context,
+                                                macroActionsValue,
+                                                macroNameController.text,
+                                                macroDescriptionController.text,
+                                                macroRecording,
+                                                _imageReturn,
+                                                isEditingMode,
+                                                widget.macroId,
+                                                widget.imageId,
+                                              );
+                                              if (result != null &&
+                                                  result == true) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            }
+                                          },
+                                          child: const Row(
+                                            children: [
+                                              Icon(Icons.edit,
+                                                  color: Colors.white),
+                                              Text(" Edit Macro",
+                                                  style: TextStyle(
+                                                      color: Colors.white))
+                                            ],
+                                          )),
+                                    ),
+                                  if (!isEditingMode)
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                          onPressed: () async {
+                                            // remove the listener for the macro recording
+                                            RawKeyboard.instance.removeListener(
+                                                _handleKeyDownEvent);
+                                            setState(() {
+                                              isMacroRecording = false;
+                                            });
+                                            // check if the macro is empty
+                                            if (macroRecording.isEmpty) {
+                                              const snackBar = SnackBar(
+                                                content: Text(
+                                                    "Please record a macro"),
+                                                duration: Duration(seconds: 3),
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
+                                            }
+                                            if (macroNameController
+                                                .text.isEmpty) {
+                                              // create a snackbar message
+                                              const snackBar = SnackBar(
+                                                content: Text(
+                                                    "Please enter a macro name"),
+                                                duration: Duration(seconds: 3),
+                                              );
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackBar);
+                                            }
+                                            if (macroRecording.isNotEmpty &&
+                                                macroNameController
+                                                    .text.isNotEmpty) {
+                                              // save the macro
+                                              bool? result =
+                                                  await showAddMacroConfirmModal(
+                                                context,
+                                                macroActionsValue,
+                                                macroNameController.text,
+                                                macroDescriptionController.text,
+                                                macroRecording,
+                                                _imageReturn,
+                                                isEditingMode,
+                                              );
+                                              if (result != null &&
+                                                  result == true) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            }
+                                          },
+                                          child: const Row(
+                                            children: [
+                                              Icon(Icons.save,
+                                                  color: Colors.white),
+                                              Text(" Save Macro",
+                                                  style: TextStyle(
+                                                      color: Colors.white))
+                                            ],
+                                          )),
+                                    ),
                                 ],
                               )
                             ],
@@ -462,7 +571,14 @@ class AddMacroModalState extends State<AddMacroModal> {
   }
 }
 
-Future<bool?> showMacroModal(BuildContext context) async {
+Future<bool?> showMacroModal(BuildContext context,
+    [String? macroId,
+    String? macroName,
+    String? macroDescription,
+    List? macroRecording,
+    int? macroType,
+    Widget? imageData,
+    String? imageId]) async {
   return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -471,25 +587,38 @@ Future<bool?> showMacroModal(BuildContext context) async {
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return const AddMacroModal();
+      return AddMacroModal(
+        macroId: macroId,
+        macroName: macroName,
+        macroDescription: macroDescription,
+        macroRecording: macroRecording,
+        macroType: macroType,
+        imageData: imageData,
+        imageId: imageId,
+      );
     },
   );
 }
 
 class AddMacroConfirmModal extends StatefulWidget {
+  final String? macroId;
   final int macroAction;
   final String macroName;
   final String macroDescription;
   final List<dynamic> macroRecording;
   final Map<dynamic, dynamic> macroImageData;
-
-  const AddMacroConfirmModal(
+  final bool isEditingMode;
+  final String? imageId;
+  AddMacroConfirmModal(
       {super.key,
       required this.macroAction,
       required this.macroName,
       required this.macroDescription,
       required this.macroRecording,
-      required this.macroImageData});
+      required this.macroImageData,
+      required this.isEditingMode,
+      this.macroId,
+      this.imageId});
 
   @override
   AddMacroConfirmModalState createState() => AddMacroConfirmModalState();
@@ -522,8 +651,8 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
       );
     }
     return AlertDialog(
-      title: const Text("Save Macro?",
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+      title: Text(widget.isEditingMode ? "Update Macro?" : "Add Macro?",
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
       content: Column(children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -542,7 +671,7 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
                 ),
               ),
             Padding(
-                padding: EdgeInsets.only(left: 10, right: 10),
+                padding: const EdgeInsets.only(left: 10, right: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,9 +715,10 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
             child: const Text("No")),
         TextButton(
             onPressed: () {
+              print(widget.macroImageData.toString());
               // send a macro creation event to the server
-              websocket.send(jsonEncode({
-                "event": "CREATE_MACRO",
+              Map jsonData = {
+                "event": widget.isEditingMode ? "EDIT_MACRO" : "CREATE_MACRO",
                 "auth_pin": websocket.pin,
                 "macro_name": widget.macroName,
                 "macro_description": widget.macroDescription,
@@ -596,8 +726,17 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
                   "type": widget.macroAction,
                   "action": widget.macroRecording
                 },
-                "macro_image_id": widget.macroImageData["id"]
-              }));
+                "macro_image_id": widget.isEditingMode
+                    ? widget.imageId
+                    : widget.macroImageData["id"]
+              };
+              if (widget.isEditingMode) {
+                jsonData["macro_id"] = widget.macroId;
+              }
+              if (widget.macroImageData.isNotEmpty) {
+                jsonData["macro_image_id"] = widget.macroImageData["id"];
+              }
+              websocket.send(jsonEncode(jsonData));
             },
             child: const Text("Yes")),
       ],
@@ -611,7 +750,10 @@ Future<bool?> showAddMacroConfirmModal(
     String name,
     String macroDescription,
     List<dynamic> macroRecording,
-    Map<dynamic, dynamic> image) async {
+    Map<dynamic, dynamic> image,
+    bool isEditingMode,
+    [String? macroId,
+    String? imageId]) async {
   return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -621,11 +763,15 @@ Future<bool?> showAddMacroConfirmModal(
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
       return AddMacroConfirmModal(
-          macroAction: macroAction,
-          macroName: name,
-          macroDescription: macroDescription,
-          macroRecording: macroRecording,
-          macroImageData: image);
+        macroAction: macroAction,
+        macroName: name,
+        macroDescription: macroDescription,
+        macroRecording: macroRecording,
+        macroImageData: image,
+        isEditingMode: isEditingMode,
+        macroId: macroId,
+        imageId: imageId,
+      );
     },
   );
 }
