@@ -419,8 +419,41 @@ class AddMacroModalState extends State<AddMacroModal> {
                               ),
                               Row(
                                 children: [
-                                  const Spacer(),
-                                  if (isEditingMode)
+                                  if (isEditingMode) ...{
+                                    Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                            ),
+                                            onPressed: () async {
+                                              bool? result =
+                                                  await showAddMacroConfirmModal(
+                                                      context,
+                                                      macroActionsValue,
+                                                      macroNameController.text,
+                                                      macroDescriptionController
+                                                          .text,
+                                                      macroRecording,
+                                                      _imageReturn,
+                                                      isEditingMode,
+                                                      widget.macroId,
+                                                      widget.imageId,
+                                                      true);
+                                              if (result != null && result) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            },
+                                            child: const Row(
+                                              children: [
+                                                Icon(Icons.delete,
+                                                    color: Colors.white),
+                                                Text(" Delete Macro",
+                                                    style: TextStyle(
+                                                        color: Colors.white))
+                                              ],
+                                            ))),
+                                    const Spacer(),
                                     Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: ElevatedButton(
@@ -474,7 +507,8 @@ class AddMacroModalState extends State<AddMacroModal> {
                                               );
                                               if (result != null &&
                                                   result == true) {
-                                                SnackBar snackBar = SnackBar(
+                                                SnackBar snackBar =
+                                                    const SnackBar(
                                                   content: Text(
                                                       "Macro saved successfully"),
                                                   duration:
@@ -495,8 +529,10 @@ class AddMacroModalState extends State<AddMacroModal> {
                                                       color: Colors.white))
                                             ],
                                           )),
-                                    ),
-                                  if (!isEditingMode)
+                                    )
+                                  },
+                                  if (!isEditingMode) ...{
+                                    const Spacer(),
                                     Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: ElevatedButton(
@@ -561,6 +597,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                             ],
                                           )),
                                     ),
+                                  }
                                 ],
                               )
                             ],
@@ -617,7 +654,8 @@ class AddMacroConfirmModal extends StatefulWidget {
   final Map<dynamic, dynamic> macroImageData;
   final bool isEditingMode;
   final String? imageId;
-  AddMacroConfirmModal(
+  final bool? isDeleteMode;
+  const AddMacroConfirmModal(
       {super.key,
       required this.macroAction,
       required this.macroName,
@@ -626,7 +664,8 @@ class AddMacroConfirmModal extends StatefulWidget {
       required this.macroImageData,
       required this.isEditingMode,
       this.macroId,
-      this.imageId});
+      this.imageId,
+      this.isDeleteMode});
 
   @override
   AddMacroConfirmModalState createState() => AddMacroConfirmModalState();
@@ -667,13 +706,38 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
             Navigator.pop(context, false);
             return true;
           }
+          if (jsonData["event"] == "DELETE_MACRO" &&
+              jsonData["status"] == true) {
+            SnackBar snackBar = const SnackBar(
+              content: Text("Macro deleted successfully"),
+              duration: Duration(seconds: 3),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            Navigator.pop(context, true);
+            return true;
+          } else if (jsonData["event"] == "DELETE_MACRO" &&
+              !jsonData["status"]) {
+            SnackBar snackBar = SnackBar(
+              content: jsonData["message"],
+              duration: const Duration(seconds: 3),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            Navigator.pop(context, false);
+            return true;
+          }
 
           return false;
         },
       );
     }
+
+    String title = widget.isEditingMode ? "Update Macro?" : "Add Macro?";
+    if (widget.isDeleteMode != null && widget.isDeleteMode!) {
+      title = "Delete Macro?";
+    }
+
     return AlertDialog(
-      title: Text(widget.isEditingMode ? "Update Macro?" : "Add Macro?",
+      title: Text(title,
           style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
       content: Column(children: [
         Row(
@@ -737,28 +801,37 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
             child: const Text("No")),
         TextButton(
             onPressed: () {
-              print(widget.macroImageData.toString());
               // send a macro creation event to the server
-              Map jsonData = {
-                "event": widget.isEditingMode ? "EDIT_MACRO" : "CREATE_MACRO",
-                "auth_pin": websocket.pin,
-                "macro_name": widget.macroName,
-                "macro_description": widget.macroDescription,
-                "macro_action": {
-                  "type": widget.macroAction,
-                  "action": widget.macroRecording
-                },
-                "macro_image_id": widget.isEditingMode
-                    ? widget.imageId
-                    : widget.macroImageData["id"]
-              };
-              if (widget.isEditingMode) {
-                jsonData["macro_id"] = widget.macroId;
+              if (widget.isDeleteMode != null && widget.isDeleteMode!) {
+                Map jsonData = {
+                  "event": "DELETE_MACRO",
+                  "auth_pin": websocket.pin,
+                  "macro_id": widget.macroId
+                };
+                websocket.send(jsonEncode(jsonData));
+                return;
+              } else {
+                Map jsonData = {
+                  "event": widget.isEditingMode ? "EDIT_MACRO" : "CREATE_MACRO",
+                  "auth_pin": websocket.pin,
+                  "macro_name": widget.macroName,
+                  "macro_description": widget.macroDescription,
+                  "macro_action": {
+                    "type": widget.macroAction,
+                    "action": widget.macroRecording
+                  },
+                  "macro_image_id": widget.isEditingMode
+                      ? widget.imageId
+                      : widget.macroImageData["id"]
+                };
+                if (widget.isEditingMode) {
+                  jsonData["macro_id"] = widget.macroId;
+                }
+                if (widget.macroImageData.isNotEmpty) {
+                  jsonData["macro_image_id"] = widget.macroImageData["id"];
+                }
+                websocket.send(jsonEncode(jsonData));
               }
-              if (widget.macroImageData.isNotEmpty) {
-                jsonData["macro_image_id"] = widget.macroImageData["id"];
-              }
-              websocket.send(jsonEncode(jsonData));
             },
             child: const Text("Yes")),
       ],
@@ -775,7 +848,8 @@ Future<bool?> showAddMacroConfirmModal(
     Map<dynamic, dynamic> image,
     bool isEditingMode,
     [String? macroId,
-    String? imageId]) async {
+    String? imageId,
+    bool? isDeleteMode]) async {
   return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -793,6 +867,7 @@ Future<bool?> showAddMacroConfirmModal(
         isEditingMode: isEditingMode,
         macroId: macroId,
         imageId: imageId,
+        isDeleteMode: isDeleteMode,
       );
     },
   );
