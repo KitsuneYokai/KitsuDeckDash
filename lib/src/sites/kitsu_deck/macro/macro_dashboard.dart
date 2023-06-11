@@ -9,7 +9,7 @@ import 'package:image/image.dart' as IMG;
 import '../../../classes/kitsu_deck/device.dart';
 import '../../../classes/websocket/connector.dart';
 import '../../../helper/network.dart';
-import 'add_macro.dart';
+import 'macro_editor.dart';
 import 'macro_images.dart';
 import 'macro_layout.dart';
 
@@ -162,7 +162,6 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 ),
                                 const SizedBox(height: 10),
                                 // stream builder with the websocket stream
-
                                 Expanded(
                                     child: SingleChildScrollView(
                                   child: Wrap(
@@ -269,7 +268,8 @@ class MacroDashboardState extends State<MacroDashboard> {
                           TextButton(
                               onPressed: () async {
                                 kitsuDeckMacroImages.clear();
-                                bool? result = await showMacroModal(context);
+                                bool? result =
+                                    await showMacroEditorModal(context);
                                 if (result! == true) {
                                   SnackBar snackBar = const SnackBar(
                                     content: Text("Macro added!"),
@@ -473,7 +473,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                 }
               }
 
-              bool? result = await showMacroModal(
+              bool? result = await showMacroEditorModal(
                   context,
                   macroData["id"],
                   macroData["name"],

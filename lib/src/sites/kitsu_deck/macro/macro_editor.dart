@@ -12,11 +12,11 @@ import '../../../classes/websocket/connector.dart';
 const List<String> macroActions = <String>["Macro"];
 
 // macro Types definitions, is used in the deck to know what type of macro it is
-int macroAction = 0; // macro = keyboard key emulation (Hello world)
+int macroAction = 0; // macro = keyboard key emulation (e.g. "Hello world")
 int fnAction = 1; // fn = function key emulation (F1-F...)
-int programAction = 2; // program = open program (Open Chrome)
+int programAction = 2; // program = open programs (Open Chrome,  Discord, etc)
 
-class AddMacroModal extends StatefulWidget {
+class MacroEditorModal extends StatefulWidget {
   final String? macroId;
   final String? macroName;
   final String? macroDescription;
@@ -25,7 +25,7 @@ class AddMacroModal extends StatefulWidget {
   final Widget? imageData;
   final String? imageId;
 
-  const AddMacroModal(
+  const MacroEditorModal(
       {super.key,
       this.macroId,
       this.macroName,
@@ -36,12 +36,14 @@ class AddMacroModal extends StatefulWidget {
       this.imageId});
 
   @override
-  AddMacroModalState createState() => AddMacroModalState();
+  MacroEditorModalState createState() => MacroEditorModalState();
 }
 
-class AddMacroModalState extends State<AddMacroModal> {
+class MacroEditorModalState extends State<MacroEditorModal> {
   // init state if macro is being edited
   bool isEditingMode = false;
+  String imageId = null.toString();
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +62,9 @@ class AddMacroModalState extends State<AddMacroModal> {
     }
     if (widget.imageData != null) {
       _imageReturn = {"image": widget.imageData!};
+    }
+    if (widget.imageId != null) {
+      imageId = widget.imageId!;
     }
   }
 
@@ -234,6 +239,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                   ),
                                   onPressed: () {
                                     setState(() {
+                                      imageId = null.toString();
                                       _imageReturn = {};
                                     });
                                   },
@@ -428,7 +434,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                             ),
                                             onPressed: () async {
                                               bool? result =
-                                                  await showAddMacroConfirmModal(
+                                                  await showMacroEditorConfirmModal(
                                                       context,
                                                       macroActionsValue,
                                                       macroNameController.text,
@@ -494,7 +500,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                               print(widget.imageId);
                                               // save the macro
                                               bool? result =
-                                                  await showAddMacroConfirmModal(
+                                                  await showMacroEditorConfirmModal(
                                                 context,
                                                 macroActionsValue,
                                                 macroNameController.text,
@@ -503,7 +509,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                                 _imageReturn,
                                                 isEditingMode,
                                                 widget.macroId,
-                                                widget.imageId,
+                                                imageId,
                                               );
                                               if (result != null &&
                                                   result == true) {
@@ -572,7 +578,7 @@ class AddMacroModalState extends State<AddMacroModal> {
                                                     .text.isNotEmpty) {
                                               // save the macro
                                               bool? result =
-                                                  await showAddMacroConfirmModal(
+                                                  await showMacroEditorConfirmModal(
                                                 context,
                                                 macroActionsValue,
                                                 macroNameController.text,
@@ -616,7 +622,7 @@ class AddMacroModalState extends State<AddMacroModal> {
   }
 }
 
-Future<bool?> showMacroModal(BuildContext context,
+Future<bool?> showMacroEditorModal(BuildContext context,
     [String? macroId,
     String? macroName,
     String? macroDescription,
@@ -632,7 +638,7 @@ Future<bool?> showMacroModal(BuildContext context,
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return AddMacroModal(
+      return MacroEditorModal(
         macroId: macroId,
         macroName: macroName,
         macroDescription: macroDescription,
@@ -645,7 +651,7 @@ Future<bool?> showMacroModal(BuildContext context,
   );
 }
 
-class AddMacroConfirmModal extends StatefulWidget {
+class MacroEditorConfirmModal extends StatefulWidget {
   final String? macroId;
   final int macroAction;
   final String macroName;
@@ -655,7 +661,7 @@ class AddMacroConfirmModal extends StatefulWidget {
   final bool isEditingMode;
   final String? imageId;
   final bool? isDeleteMode;
-  const AddMacroConfirmModal(
+  const MacroEditorConfirmModal(
       {super.key,
       required this.macroAction,
       required this.macroName,
@@ -668,10 +674,10 @@ class AddMacroConfirmModal extends StatefulWidget {
       this.isDeleteMode});
 
   @override
-  AddMacroConfirmModalState createState() => AddMacroConfirmModalState();
+  MacroEditorConfirmModalState createState() => MacroEditorConfirmModalState();
 }
 
-class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
+class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
   @override
   Widget build(BuildContext context) {
     final websocket = Provider.of<DeckWebsocket>(context);
@@ -791,6 +797,7 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
               ),
           ],
         )),
+        Text(widget.macroImageData.toString())
         // here maybe add a test btn that will run the macro
       ]),
       actions: [
@@ -827,7 +834,9 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
                 if (widget.isEditingMode) {
                   jsonData["macro_id"] = widget.macroId;
                 }
-                if (widget.macroImageData.isNotEmpty) {
+                if (widget.macroImageData["id"] != null &&
+                    widget.macroImageData.isNotEmpty &&
+                    widget.isEditingMode) {
                   jsonData["macro_image_id"] = widget.macroImageData["id"];
                 }
                 websocket.send(jsonEncode(jsonData));
@@ -839,7 +848,7 @@ class AddMacroConfirmModalState extends State<AddMacroConfirmModal> {
   }
 }
 
-Future<bool?> showAddMacroConfirmModal(
+Future<bool?> showMacroEditorConfirmModal(
     BuildContext context,
     int macroAction,
     String name,
@@ -858,7 +867,7 @@ Future<bool?> showAddMacroConfirmModal(
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return AddMacroConfirmModal(
+      return MacroEditorConfirmModal(
         macroAction: macroAction,
         macroName: name,
         macroDescription: macroDescription,
