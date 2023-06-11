@@ -497,7 +497,6 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                             if (macroRecording.isNotEmpty &&
                                                 macroNameController
                                                     .text.isNotEmpty) {
-                                              print(widget.imageId);
                                               // save the macro
                                               bool? result =
                                                   await showMacroEditorConfirmModal(
@@ -797,7 +796,6 @@ class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
               ),
           ],
         )),
-        Text(widget.macroImageData.toString())
         // here maybe add a test btn that will run the macro
       ]),
       actions: [
