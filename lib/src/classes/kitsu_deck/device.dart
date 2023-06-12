@@ -7,6 +7,7 @@ class KitsuDeck extends ChangeNotifier {
   late String _hostname;
   late String _ip;
   late String _pin;
+  // TODO: add List _macroData & _kitsuDeckMacroImages, so it updates the state of the modals if something changes
 
   get hostname => _hostname;
   get ip => _ip;

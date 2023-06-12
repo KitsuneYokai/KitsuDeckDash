@@ -94,525 +94,514 @@ class MacroEditorModalState extends State<MacroEditorModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: DragToResizeArea(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.6),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-                  ],
-                ),
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: DragToResizeArea(
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: const EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.6),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                ],
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DragToMoveArea(
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Text(
-                                isEditingMode ? "Edit Macro" : "Add Macro",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25,
-                                ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: DragToMoveArea(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              isEditingMode ? "Edit Macro" : "Add Macro",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: TextButton(
-                          onPressed: () async {
-                            if (isMacroRecording) {
-                              RawKeyboard.instance
-                                  .removeListener(_handleKeyDownEvent);
-                            }
-                            Navigator.of(context).pop(false);
-                          },
-                          child: const Icon(Icons.close),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: TextButton(
+                        onPressed: () async {
+                          if (isMacroRecording) {
+                            RawKeyboard.instance
+                                .removeListener(_handleKeyDownEvent);
+                          }
+                          Navigator.of(context).pop(false);
+                        },
+                        child: const Icon(Icons.close),
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: macroNameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Macro Name',
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TextField(
+                              controller: macroDescriptionController,
+                              minLines: 3,
+                              maxLines: 3,
+                              maxLength: 500,
+                              decoration: const InputDecoration(
+                                labelText: 'Macro Description',
+                              ),
+                            ),
+                          ],
                         ),
-                      )
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            if (_imageReturn.isEmpty) ...{
+                              Container(
+                                width: 158,
+                                height: 158,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.grey[700]!,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: InkWell(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add,
+                                          color: Colors.white.withOpacity(0.5),
+                                        ),
+                                        const Text(
+                                          "Add Image",
+                                          style: TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
+                                    onTap: () async {
+                                      final imageData =
+                                          await showMacroImagesModal(
+                                              context, true);
+                                      setState(() {
+                                        _imageReturn = imageData!;
+                                      });
+                                    }),
+                              )
+                            } else ...{
+                              SizedBox(
+                                  width: 150,
+                                  height: 150,
+                                  child: _imageReturn["image"]),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    imageId = null.toString();
+                                    _imageReturn = {};
+                                  });
+                                },
+                              )
+                            }
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
+                ),
+                DropdownButton(
+                  hint: const Text("Select Action"),
+                  value: macroActions[macroActionsValue],
+                  iconSize: 24,
+                  elevation: 16,
+                  underline: Container(
+                    height: 2,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (value) => setState(() {
+                    macroActionsValue = macroActions.indexOf(value!);
+                  }),
+                  items: macroActions
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: const TextStyle(fontSize: 20)),
+                    );
+                  }).toList(),
+                ),
+                if (macroActionsValue == macroAction) ...{
+                  Expanded(
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
                             children: [
-                              TextField(
-                                controller: macroNameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Macro Name',
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isMacroRecording
+                                      ? Colors.white70
+                                      : Colors.white,
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              TextField(
-                                controller: macroDescriptionController,
-                                minLines: 3,
-                                maxLines: 3,
-                                maxLength: 500,
-                                decoration: const InputDecoration(
-                                  labelText: 'Macro Description',
+                                child: Icon(
+                                  isMacroRecording ? Icons.stop : Icons.circle,
+                                  color: isMacroRecording
+                                      ? Colors.red
+                                      : Colors.green,
+                                  size: isMacroRecording ? 20 : 15,
                                 ),
+                                onPressed: () async {
+                                  if (isMacroRecording) {
+                                    RawKeyboard.instance
+                                        .removeListener(_handleKeyDownEvent);
+                                  } else {
+                                    RawKeyboard.instance
+                                        .addListener(_handleKeyDownEvent);
+                                  }
+                                  setState(() {
+                                    isMacroRecording = !isMacroRecording;
+                                  });
+                                },
                               ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              if (_imageReturn.isEmpty) ...{
-                                Container(
-                                  width: 158,
-                                  height: 158,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.grey[700]!,
-                                      width: 3,
+                              const SizedBox(width: 10),
+                              DragTarget<int>(
+                                builder: (
+                                  BuildContext context,
+                                  List<dynamic> accepted,
+                                  List<dynamic> rejected,
+                                ) {
+                                  return ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
                                     ),
-                                  ),
-                                  child: InkWell(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add,
-                                            color:
-                                                Colors.white.withOpacity(0.5),
-                                          ),
-                                          const Text(
-                                            "Add Image",
-                                            style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold),
-                                          )
-                                        ],
-                                      ),
-                                      onTap: () async {
-                                        final imageData =
-                                            await showMacroImagesModal(
-                                                context, true);
-                                        setState(() {
-                                          _imageReturn = imageData!;
-                                        });
-                                      }),
-                                )
-                              } else ...{
-                                SizedBox(
-                                    width: 150,
-                                    height: 150,
-                                    child: _imageReturn["image"]),
-                                const SizedBox(height: 10),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  child: const Icon(
-                                    Icons.delete,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                      size: 20,
+                                    ),
+                                    onPressed: () async {
+                                      setState(() {
+                                        macroRecording = [];
+                                      });
+                                    },
+                                  );
+                                },
+                                onAccept: (int? acceptedIndex) {
+                                  if (acceptedIndex != null) {
                                     setState(() {
-                                      imageId = null.toString();
-                                      _imageReturn = {};
+                                      macroRecording.removeAt(acceptedIndex);
                                     });
-                                  },
-                                )
-                              }
+                                  }
+                                },
+                                onWillAccept: (int? acceptedIndex) {
+                                  return acceptedIndex != null;
+                                },
+                              ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  DropdownButton(
-                    hint: const Text("Select Action"),
-                    value: macroActions[macroActionsValue],
-                    iconSize: 24,
-                    elevation: 16,
-                    underline: Container(
-                      height: 2,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (value) => setState(() {
-                      macroActionsValue = macroActions.indexOf(value!);
-                    }),
-                    items: macroActions
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: const TextStyle(fontSize: 20)),
-                      );
-                    }).toList(),
-                  ),
-                  if (macroActionsValue == macroAction) ...{
-                    Expanded(
-                      child: Padding(
-                        padding:
-                            const EdgeInsets.only(left: 20, right: 20, top: 5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isMacroRecording
-                                        ? Colors.white70
-                                        : Colors.white,
-                                  ),
-                                  child: Icon(
-                                    isMacroRecording
-                                        ? Icons.stop
-                                        : Icons.circle,
-                                    color: isMacroRecording
-                                        ? Colors.red
-                                        : Colors.green,
-                                    size: isMacroRecording ? 20 : 15,
-                                  ),
-                                  onPressed: () async {
-                                    if (isMacroRecording) {
-                                      RawKeyboard.instance
-                                          .removeListener(_handleKeyDownEvent);
-                                    } else {
-                                      RawKeyboard.instance
-                                          .addListener(_handleKeyDownEvent);
-                                    }
-                                    setState(() {
-                                      isMacroRecording = !isMacroRecording;
-                                    });
-                                  },
-                                ),
-                                const SizedBox(width: 10),
-                                DragTarget<int>(
-                                  builder: (
-                                    BuildContext context,
-                                    List<dynamic> accepted,
-                                    List<dynamic> rejected,
-                                  ) {
-                                    return ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                      ),
-                                      child: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      onPressed: () async {
-                                        setState(() {
-                                          macroRecording = [];
-                                        });
-                                      },
-                                    );
-                                  },
-                                  onAccept: (int? acceptedIndex) {
-                                    if (acceptedIndex != null) {
-                                      setState(() {
-                                        macroRecording.removeAt(acceptedIndex);
-                                      });
-                                    }
-                                  },
-                                  onWillAccept: (int? acceptedIndex) {
-                                    return acceptedIndex != null;
-                                  },
-                                ),
-                              ],
-                            ),
-                            if (macroRecording.isNotEmpty) ...[
-                              const SizedBox(height: 10),
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  child: Wrap(
-                                    clipBehavior: Clip.antiAlias,
-                                    children: [
-                                      for (var index = 0;
-                                          index < macroRecording.length;
-                                          index++)
-                                        Draggable(
-                                          data: index,
-                                          feedback: Material(
-                                            child: Container(
-                                              padding: const EdgeInsets.all(5),
-                                              child: ElevatedButton(
+                          if (macroRecording.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Wrap(
+                                  clipBehavior: Clip.antiAlias,
+                                  children: [
+                                    for (var index = 0;
+                                        index < macroRecording.length;
+                                        index++)
+                                      Draggable(
+                                        data: index,
+                                        feedback: Material(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(5),
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.white70,
+                                              ),
+                                              onPressed: null,
+                                              child: Text(
+                                                macroRecording[index]["key"],
+                                                style: const TextStyle(
+                                                    fontSize: 20),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        childWhenDragging: Container(),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: DragTarget<int>(
+                                            builder: (
+                                              BuildContext context,
+                                              List<dynamic> accepted,
+                                              List<dynamic> rejected,
+                                            ) {
+                                              return ElevatedButton(
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:
                                                       Colors.white70,
                                                 ),
-                                                onPressed: null,
                                                 child: Text(
                                                   macroRecording[index]["key"],
                                                   style: const TextStyle(
                                                       fontSize: 20),
                                                 ),
-                                              ),
-                                            ),
-                                          ),
-                                          childWhenDragging: Container(),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(5),
-                                            child: DragTarget<int>(
-                                              builder: (
-                                                BuildContext context,
-                                                List<dynamic> accepted,
-                                                List<dynamic> rejected,
-                                              ) {
-                                                return ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.white70,
-                                                  ),
-                                                  child: Text(
-                                                    macroRecording[index]
-                                                        ["key"],
-                                                    style: const TextStyle(
-                                                        fontSize: 20),
-                                                  ),
-                                                  onPressed: () async {},
-                                                );
-                                              },
-                                              onAccept: (int? acceptedIndex) {
-                                                if (acceptedIndex != null) {
-                                                  setState(() {
-                                                    final draggedItem =
-                                                        macroRecording[
-                                                            acceptedIndex];
-                                                    macroRecording.removeAt(
-                                                        acceptedIndex);
-                                                    macroRecording.insert(
-                                                        index, draggedItem);
-                                                  });
-                                                }
-                                              },
-                                              onWillAccept:
-                                                  (int? acceptedIndex) {
-                                                return acceptedIndex != null;
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  if (isEditingMode) ...{
-                                    Padding(
-                                        padding: const EdgeInsets.all(10),
-                                        child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                            ),
-                                            onPressed: () async {
-                                              bool? result =
-                                                  await showMacroEditorConfirmModal(
-                                                      context,
-                                                      macroActionsValue,
-                                                      macroNameController.text,
-                                                      macroDescriptionController
-                                                          .text,
-                                                      macroRecording,
-                                                      _imageReturn,
-                                                      isEditingMode,
-                                                      widget.macroId,
-                                                      widget.imageId,
-                                                      true);
-                                              if (result != null && result) {
-                                                Navigator.pop(context, true);
+                                                onPressed: () async {},
+                                              );
+                                            },
+                                            onAccept: (int? acceptedIndex) {
+                                              if (acceptedIndex != null) {
+                                                setState(() {
+                                                  final draggedItem =
+                                                      macroRecording[
+                                                          acceptedIndex];
+                                                  macroRecording
+                                                      .removeAt(acceptedIndex);
+                                                  macroRecording.insert(
+                                                      index, draggedItem);
+                                                });
                                               }
                                             },
-                                            child: const Row(
-                                              children: [
-                                                Icon(Icons.delete,
-                                                    color: Colors.white),
-                                                Text(" Delete Macro",
-                                                    style: TextStyle(
-                                                        color: Colors.white))
-                                              ],
-                                            ))),
-                                    const Spacer(),
-                                    Padding(
+                                            onWillAccept: (int? acceptedIndex) {
+                                              return acceptedIndex != null;
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                if (isEditingMode) ...{
+                                  Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green,
+                                            backgroundColor: Colors.red,
                                           ),
                                           onPressed: () async {
-                                            // remove the listener for the macro recording
-                                            RawKeyboard.instance.removeListener(
-                                                _handleKeyDownEvent);
-                                            setState(() {
-                                              isMacroRecording = false;
-                                            });
-                                            // check if the macro is empty
-                                            if (macroRecording.isEmpty) {
-                                              const snackBar = SnackBar(
-                                                content: Text(
-                                                    "Please record a macro"),
-                                                duration: Duration(seconds: 3),
-                                              );
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(snackBar);
-                                            }
-                                            if (macroNameController
-                                                .text.isEmpty) {
-                                              // create a snackbar message
-                                              const snackBar = SnackBar(
-                                                content: Text(
-                                                    "Please enter a macro name"),
-                                                duration: Duration(seconds: 3),
-                                              );
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(snackBar);
-                                            }
-                                            if (macroRecording.isNotEmpty &&
-                                                macroNameController
-                                                    .text.isNotEmpty) {
-                                              // save the macro
-                                              bool? result =
-                                                  await showMacroEditorConfirmModal(
-                                                context,
-                                                macroActionsValue,
-                                                macroNameController.text,
-                                                macroDescriptionController.text,
-                                                macroRecording,
-                                                _imageReturn,
-                                                isEditingMode,
-                                                widget.macroId,
-                                                imageId,
-                                              );
-                                              if (result != null &&
-                                                  result == true) {
-                                                SnackBar snackBar =
-                                                    const SnackBar(
-                                                  content: Text(
-                                                      "Macro saved successfully"),
-                                                  duration:
-                                                      Duration(seconds: 3),
-                                                );
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(snackBar);
-                                                Navigator.pop(context, true);
-                                              }
+                                            bool? result =
+                                                await showMacroEditorConfirmModal(
+                                                    context,
+                                                    macroActionsValue,
+                                                    macroNameController.text,
+                                                    macroDescriptionController
+                                                        .text,
+                                                    macroRecording,
+                                                    _imageReturn,
+                                                    isEditingMode,
+                                                    widget.macroId,
+                                                    widget.imageId,
+                                                    true);
+                                            if (result != null && result) {
+                                              Navigator.pop(context, true);
                                             }
                                           },
                                           child: const Row(
                                             children: [
-                                              Icon(Icons.edit,
+                                              Icon(Icons.delete,
                                                   color: Colors.white),
-                                              Text(" Edit Macro",
+                                              Text(" Delete Macro",
                                                   style: TextStyle(
                                                       color: Colors.white))
                                             ],
-                                          )),
-                                    )
-                                  },
-                                  if (!isEditingMode) ...{
-                                    const Spacer(),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green,
-                                          ),
-                                          onPressed: () async {
-                                            // remove the listener for the macro recording
-                                            RawKeyboard.instance.removeListener(
-                                                _handleKeyDownEvent);
-                                            setState(() {
-                                              isMacroRecording = false;
-                                            });
-                                            // check if the macro is empty
-                                            if (macroRecording.isEmpty) {
-                                              const snackBar = SnackBar(
+                                          ))),
+                                  const Spacer(),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                        ),
+                                        onPressed: () async {
+                                          // remove the listener for the macro recording
+                                          RawKeyboard.instance.removeListener(
+                                              _handleKeyDownEvent);
+                                          setState(() {
+                                            isMacroRecording = false;
+                                          });
+                                          // check if the macro is empty
+                                          if (macroRecording.isEmpty) {
+                                            const snackBar = SnackBar(
+                                              content:
+                                                  Text("Please record a macro"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                          if (macroNameController
+                                              .text.isEmpty) {
+                                            // create a snackbar message
+                                            const snackBar = SnackBar(
+                                              content: Text(
+                                                  "Please enter a macro name"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                          if (macroRecording.isNotEmpty &&
+                                              macroNameController
+                                                  .text.isNotEmpty) {
+                                            // save the macro
+                                            bool? result =
+                                                await showMacroEditorConfirmModal(
+                                              context,
+                                              macroActionsValue,
+                                              macroNameController.text,
+                                              macroDescriptionController.text,
+                                              macroRecording,
+                                              _imageReturn,
+                                              isEditingMode,
+                                              widget.macroId,
+                                              imageId,
+                                            );
+                                            if (result != null &&
+                                                result == true) {
+                                              SnackBar snackBar =
+                                                  const SnackBar(
                                                 content: Text(
-                                                    "Please record a macro"),
+                                                    "Macro saved successfully"),
                                                 duration: Duration(seconds: 3),
                                               );
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(snackBar);
+                                              Navigator.pop(context, true);
                                             }
-                                            if (macroNameController
-                                                .text.isEmpty) {
-                                              // create a snackbar message
-                                              const snackBar = SnackBar(
-                                                content: Text(
-                                                    "Please enter a macro name"),
-                                                duration: Duration(seconds: 3),
-                                              );
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(snackBar);
+                                          }
+                                        },
+                                        child: const Row(
+                                          children: [
+                                            Icon(Icons.edit,
+                                                color: Colors.white),
+                                            Text(" Edit Macro",
+                                                style: TextStyle(
+                                                    color: Colors.white))
+                                          ],
+                                        )),
+                                  )
+                                },
+                                if (!isEditingMode) ...{
+                                  const Spacer(),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                        ),
+                                        onPressed: () async {
+                                          // remove the listener for the macro recording
+                                          RawKeyboard.instance.removeListener(
+                                              _handleKeyDownEvent);
+                                          setState(() {
+                                            isMacroRecording = false;
+                                          });
+                                          // check if the macro is empty
+                                          if (macroRecording.isEmpty) {
+                                            const snackBar = SnackBar(
+                                              content:
+                                                  Text("Please record a macro"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                          if (macroNameController
+                                              .text.isEmpty) {
+                                            // create a snackbar message
+                                            const snackBar = SnackBar(
+                                              content: Text(
+                                                  "Please enter a macro name"),
+                                              duration: Duration(seconds: 3),
+                                            );
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          }
+                                          if (macroRecording.isNotEmpty &&
+                                              macroNameController
+                                                  .text.isNotEmpty) {
+                                            // save the macro
+                                            bool? result =
+                                                await showMacroEditorConfirmModal(
+                                              context,
+                                              macroActionsValue,
+                                              macroNameController.text,
+                                              macroDescriptionController.text,
+                                              macroRecording,
+                                              _imageReturn,
+                                              isEditingMode,
+                                            );
+                                            if (result != null &&
+                                                result == true) {
+                                              Navigator.pop(context, true);
                                             }
-                                            if (macroRecording.isNotEmpty &&
-                                                macroNameController
-                                                    .text.isNotEmpty) {
-                                              // save the macro
-                                              bool? result =
-                                                  await showMacroEditorConfirmModal(
-                                                context,
-                                                macroActionsValue,
-                                                macroNameController.text,
-                                                macroDescriptionController.text,
-                                                macroRecording,
-                                                _imageReturn,
-                                                isEditingMode,
-                                              );
-                                              if (result != null &&
-                                                  result == true) {
-                                                Navigator.pop(context, true);
-                                              }
-                                            }
-                                          },
-                                          child: const Row(
-                                            children: [
-                                              Icon(Icons.save,
-                                                  color: Colors.white),
-                                              Text(" Save Macro",
-                                                  style: TextStyle(
-                                                      color: Colors.white))
-                                            ],
-                                          )),
-                                    ),
-                                  }
-                                ],
-                              )
-                            ],
+                                          }
+                                        },
+                                        child: const Row(
+                                          children: [
+                                            Icon(Icons.save,
+                                                color: Colors.white),
+                                            Text(" Save Macro",
+                                                style: TextStyle(
+                                                    color: Colors.white))
+                                          ],
+                                        )),
+                                  ),
+                                }
+                              ],
+                            )
                           ],
-                        ),
+                        ],
                       ),
                     ),
-                  },
-                ],
-              ),
+                  ),
+                },
+              ],
             ),
           ),
         ),

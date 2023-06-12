@@ -305,9 +305,14 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 Text("Macro Images")
                               ])),
                           TextButton(
-                              onPressed: () {
-                                showMacroLayoutEditorModal(context);
-                              },
+                              onPressed: isMacroImageLoaded &&
+                                      isMacroLoaded &&
+                                      macroData.isNotEmpty
+                                  ? () {
+                                      showMacroLayoutEditorModal(context,
+                                          macroData, kitsuDeckMacroImages);
+                                    }
+                                  : null,
                               child: const Row(children: [
                                 Icon(Icons.grid_view),
                                 Text("Layout")

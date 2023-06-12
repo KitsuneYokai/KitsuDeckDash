@@ -103,206 +103,204 @@ class MacroImagesModalState extends State<MacroImagesModal> {
       });
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: DragToResizeArea(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-                    Theme.of(context).primaryColor.withOpacity(0.6),
-                  ],
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.pop(context, {});
-                            },
-                            child: const Icon(
-                              Icons.arrow_back_ios,
-                              color: Colors.white,
-                            )),
-                      ),
-                      const Expanded(
-                        child: DragToMoveArea(
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Row(
-                                children: [
-                                  Spacer(),
-                                  Text(
-                                    "Macro Images",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 25,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                      child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      runSpacing: 10,
-                      spacing: 10,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: Colors.grey[400]!,
-                                width: 5,
-                              )),
-                          child: InkWell(
-                            child: const Icon(Icons.add),
-                            onTap: () async {
-                              _kitsuDeckMacroImages.clear();
-
-                              bool? result =
-                                  await showMacroImagesUploadModal(context);
-                              if (result != null && result) {
-                                setState(() {
-                                  _kitsuDeckMacroImages = [];
-                                  _isLoaded = false;
-                                  _isLoading = false;
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                        for (var image in _kitsuDeckMacroImages) ...{
-                          Stack(
-                            children: [
-                              Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    border:
-                                        _imageB64Return["id"] == image["id"] &&
-                                                widget.isSelectable
-                                            ? Border.all(
-                                                color: Colors.white,
-                                                width: 5,
-                                              )
-                                            : Border.all(
-                                                color: Colors.transparent,
-                                                width: 5,
-                                              ),
-                                  ),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: image["image"],
-                                    onTap: widget.isSelectable
-                                        ? () {
-                                            setState(() {
-                                              _imageB64Return = image;
-                                            });
-                                          }
-                                        : null,
-                                  )),
-                              Positioned(
-                                right: 5,
-                                bottom: 5,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      shadowColor: Colors.transparent,
-                                      elevation: 0,
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: const Size(2, 2),
-                                      shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(5)))),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(3),
-                                    child: Icon(
-                                      Icons.delete,
-                                      size: 20,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    bool? result =
-                                        await showDeleteMacroImageModal(
-                                            context, image);
-                                    if (result != null && result) {
-                                      setState(() {
-                                        _imageB64Return = {};
-                                        _kitsuDeckMacroImages = [];
-                                        _isLoaded = false;
-                                        _isLoading = false;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        },
-                        if (_isLoading) ...{
-                          const SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        },
-                      ],
-                    ),
-                  )),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        if (widget.isSelectable) ...{
-                          const Spacer(),
-                          ElevatedButton(
-                            onPressed: _imageB64Return.isEmpty
-                                ? null
-                                : () {
-                                    Navigator.pop(context, _imageB64Return);
-                                  },
-                            style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.green),
-                            child: const Text("Select"),
-                          ),
-                        }
-                      ],
-                    ),
-                  )
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: DragToResizeArea(
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: const EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                  Theme.of(context).primaryColor.withOpacity(0.6),
                 ],
               ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, {});
+                          },
+                          child: const Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                          )),
+                    ),
+                    const Expanded(
+                      child: DragToMoveArea(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                Spacer(),
+                                Text(
+                                  "Macro Images",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                    child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 10,
+                    spacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Colors.grey[400]!,
+                              width: 5,
+                            )),
+                        child: InkWell(
+                          child: const Icon(Icons.add),
+                          onTap: () async {
+                            _kitsuDeckMacroImages.clear();
+
+                            bool? result =
+                                await showMacroImagesUploadModal(context);
+                            if (result != null && result) {
+                              setState(() {
+                                _kitsuDeckMacroImages = [];
+                                _isLoaded = false;
+                                _isLoading = false;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      for (var image in _kitsuDeckMacroImages) ...{
+                        Stack(
+                          children: [
+                            Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  border:
+                                      _imageB64Return["id"] == image["id"] &&
+                                              widget.isSelectable
+                                          ? Border.all(
+                                              color: Colors.white,
+                                              width: 5,
+                                            )
+                                          : Border.all(
+                                              color: Colors.transparent,
+                                              width: 5,
+                                            ),
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: image["image"],
+                                  onTap: widget.isSelectable
+                                      ? () {
+                                          setState(() {
+                                            _imageB64Return = image;
+                                          });
+                                        }
+                                      : null,
+                                )),
+                            Positioned(
+                              right: 5,
+                              bottom: 5,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                    elevation: 0,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(2, 2),
+                                    shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5)))),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(3),
+                                  child: Icon(
+                                    Icons.delete,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  bool? result =
+                                      await showDeleteMacroImageModal(
+                                          context, image);
+                                  if (result != null && result) {
+                                    setState(() {
+                                      _imageB64Return = {};
+                                      _kitsuDeckMacroImages = [];
+                                      _isLoaded = false;
+                                      _isLoading = false;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      },
+                      if (_isLoading) ...{
+                        const SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      },
+                    ],
+                  ),
+                )),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      if (widget.isSelectable) ...{
+                        const Spacer(),
+                        ElevatedButton(
+                          onPressed: _imageB64Return.isEmpty
+                              ? null
+                              : () {
+                                  Navigator.pop(context, _imageB64Return);
+                                },
+                          style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.green),
+                          child: const Text("Select"),
+                        ),
+                      }
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
         ),
@@ -417,166 +415,164 @@ class MacroImagesUploadModalState extends State<MacroImagesUploadModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: DragToResizeArea(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              padding: const EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.6),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-                  ],
-                ),
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: DragToResizeArea(
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: const EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.6),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                ],
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: const Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                        child: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
                         ),
                       ),
-                      const Expanded(
-                        child: DragToMoveArea(
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Row(
-                                children: [
-                                  Spacer(),
-                                  Text(
-                                    "Upload macro image",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 25,
-                                    ),
+                    ),
+                    const Expanded(
+                      child: DragToMoveArea(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                Spacer(),
+                                Text(
+                                  "Upload macro image",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                if (_image == null) ...{
+                  const Spacer(),
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        // make border gradient
+                        color: Colors.grey[400]!,
+                        width: 5,
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () async {
+                        // open file picker
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['jpg', 'png', 'bmp'],
+                        );
+                        if (result != null) {
+                          setState(() {
+                            _image = File(result.files.single.path!);
+                            imageCropController = CropController(
+                              aspectRatio: 1,
+                              defaultCrop:
+                                  const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
+                            );
+                          });
+                        }
+                      },
+                      child: const Icon(
+                        Icons.upload_file,
+                        size: 75,
+                      ),
+                    ),
+                  ),
+                  // ignore: prefer_const_constructors
+                  Spacer(),
+                },
+                if (_image != null)
+                  Expanded(
+                      child: CropImage(
+                    image: Image.file(_image),
+                    controller: imageCropController,
+                    alwaysMove: true,
+                  )),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      if (_image != null) ...{
+                        TextButton(
+                          onPressed: () {
+                            imageCropController.rotateRight();
+                          },
+                          child: const Icon(Icons.rotate_90_degrees_cw),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _image = null;
+                            });
+                          },
+                          child: const Icon(Icons.delete),
+                        ),
+                      },
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: _image != null
+                            ? () async {
+                                // crop image
+                                Image croppedImage =
+                                    await imageCropController.croppedImage();
+                                var bitmap =
+                                    await imageCropController.croppedBitmap();
+                                bool? upload =
+                                    await showMacroImagesUploadConfirmModal(
+                                        context, croppedImage, bitmap);
+                                if (upload != null && upload) {
+                                  Navigator.pop(context, true);
+                                }
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
+                        child: const Text("Upload"),
+                      ),
                     ],
                   ),
-                  if (_image == null) ...{
-                    const Spacer(),
-                    Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          // make border gradient
-                          color: Colors.grey[400]!,
-                          width: 5,
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: () async {
-                          // open file picker
-                          FilePickerResult? result =
-                              await FilePicker.platform.pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: ['jpg', 'png', 'bmp'],
-                          );
-                          if (result != null) {
-                            setState(() {
-                              _image = File(result.files.single.path!);
-                              imageCropController = CropController(
-                                aspectRatio: 1,
-                                defaultCrop:
-                                    const Rect.fromLTRB(0.1, 0.1, 0.9, 0.9),
-                              );
-                            });
-                          }
-                        },
-                        child: const Icon(
-                          Icons.upload_file,
-                          size: 75,
-                        ),
-                      ),
-                    ),
-                    // ignore: prefer_const_constructors
-                    Spacer(),
-                  },
-                  if (_image != null)
-                    Expanded(
-                        child: CropImage(
-                      image: Image.file(_image),
-                      controller: imageCropController,
-                      alwaysMove: true,
-                    )),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        if (_image != null) ...{
-                          TextButton(
-                            onPressed: () {
-                              imageCropController.rotateRight();
-                            },
-                            child: const Icon(Icons.rotate_90_degrees_cw),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _image = null;
-                              });
-                            },
-                            child: const Icon(Icons.delete),
-                          ),
-                        },
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: _image != null
-                              ? () async {
-                                  // crop image
-                                  Image croppedImage =
-                                      await imageCropController.croppedImage();
-                                  var bitmap =
-                                      await imageCropController.croppedBitmap();
-                                  bool? upload =
-                                      await showMacroImagesUploadConfirmModal(
-                                          context, croppedImage, bitmap);
-                                  if (upload != null && upload) {
-                                    Navigator.pop(context, true);
-                                  }
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                          ),
-                          child: const Text("Upload"),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ),
