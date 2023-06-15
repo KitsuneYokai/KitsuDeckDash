@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -17,6 +18,13 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
   final int _maxMacroPerPage = 20; // max macro per page
   int _currentMacroPage =
       0; // current macro page if 0 = first page 1-20, if 1-99: X*_maxMacro + macroPosition(1-20)
+
+  TextEditingController _macroPageController = TextEditingController();
+
+  void initState() {
+    super.initState();
+    _macroPageController.text = (_currentMacroPage + 1).toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,23 +181,68 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          const Spacer(),
                           ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .secondary, // foreground
+                              ),
                               onPressed: () {
-                                setState(() {
-                                  if (_currentMacroPage > 0) {
-                                    _currentMacroPage--;
-                                  }
-                                });
+                                if (_currentMacroPage > 0) {
+                                  _currentMacroPage--;
+                                  setState(() {
+                                    _macroPageController.text =
+                                        (_currentMacroPage + 1).toString();
+                                  });
+                                }
                               },
                               child: const Icon(Icons.arrow_back)),
-                          Text((_currentMacroPage + 1).toString()),
+                          const Spacer(),
+                          Flexible(
+                            flex: 1,
+                            child: TextField(
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              onChanged: (value) {
+                                if (value != "" &&
+                                    value != null &&
+                                    value != "0" &&
+                                    int.parse(value) <= 499) {
+                                  setState(() {
+                                    _currentMacroPage = int.parse(value) - 1;
+                                  });
+                                }
+                              },
+                              controller: _macroPageController,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: 'Page',
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
                           ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .secondary, // foreground
+                              ),
                               onPressed: () {
-                                setState(() {
+                                if (_currentMacroPage < 498) {
                                   _currentMacroPage++;
-                                });
+
+                                  setState(() {
+                                    _macroPageController.text =
+                                        (_currentMacroPage + 1).toString();
+                                  });
+                                }
                               },
                               child: const Icon(Icons.arrow_forward)),
+                          const Spacer(),
                         ],
                       ),
                       Flexible(
@@ -302,7 +355,7 @@ Future<bool?> showMacroLayoutEditorModal(BuildContext context) async {
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return MacroLayoutEditor();
+      return const MacroLayoutEditor();
     },
   );
 }

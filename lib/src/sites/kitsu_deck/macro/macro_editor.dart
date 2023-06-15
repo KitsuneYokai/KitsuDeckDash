@@ -100,7 +100,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
         backgroundColor: Colors.transparent,
         body: DragToResizeArea(
           child: Container(
-            margin: const EdgeInsets.all(10),
+            margin: const EdgeInsets.all(20),
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             padding: const EdgeInsets.all(1),

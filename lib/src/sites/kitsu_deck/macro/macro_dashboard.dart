@@ -118,6 +118,10 @@ class MacroDashboardState extends State<MacroDashboard> {
                               }
                               if (jsonData["event"] == "GET_MACRO_IMAGES" &&
                                   !kitsuDeck.isMacroImagesLoaded) {
+                                // check if jsonData["images"] is empty
+                                if (jsonData["images"].length == 0) {
+                                  kitsuDeck.setIsMacroImagesLoaded(true);
+                                }
                                 for (var image in jsonData["images"]) {
                                   // delay loading of next image
                                   Future.delayed(const Duration(seconds: 1),
@@ -174,7 +178,8 @@ class MacroDashboardState extends State<MacroDashboard> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Stack(children: [
-                                        for (var image in kitsuDeck.macroImages)
+                                        for (var image
+                                            in kitsuDeck.macroImages) ...[
                                           if (image["id"] ==
                                               macro["image"]) ...[
                                             image["image"],
@@ -184,10 +189,25 @@ class MacroDashboardState extends State<MacroDashboard> {
                                                   BorderRadius.circular(10),
                                               child: Image.asset(
                                                 "assets/images/macro_icon.jpg",
+                                                width: 100,
+                                                height: 100,
                                                 fit: BoxFit.cover,
                                               ),
                                             ),
-                                          ],
+                                          ]
+                                        ],
+                                        if (kitsuDeck.macroImages.isEmpty) ...[
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.asset(
+                                              "assets/images/macro_icon.jpg",
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ],
                                         Container(
                                           width: 100,
                                           height: 100,
@@ -375,11 +395,6 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                     if (image["id"] == widget.macro["image"]) ...{
                       image["image"]
                     }
-                } else ...{
-                  const SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: Center(child: CircularProgressIndicator()))
                 }
               },
               Column(
@@ -387,7 +402,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                   Text(widget.macro["name"],
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(macroData["description"] ?? "No description"),
+                  Text(macroData["description"] ?? ""),
                 ],
               ),
             ]),

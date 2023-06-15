@@ -19,10 +19,10 @@ class KitsuDeck extends ChangeNotifier {
   get ip => _ip;
   get pin => _pin;
 
-  get macroData => _macroData;
-  get isMacroDataLoaded => _isMacroDataLoaded;
-  get isMacroImagesLoaded => _isMacroImagesLoaded;
-  get macroImages => _macroImages;
+  List get macroData => _macroData;
+  bool get isMacroDataLoaded => _isMacroDataLoaded;
+  bool get isMacroImagesLoaded => _isMacroImagesLoaded;
+  List get macroImages => _macroImages;
 
   // --- setter functions ---
   void setPin(String pin) {
