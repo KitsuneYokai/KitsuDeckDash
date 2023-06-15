@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import '../../../classes/websocket/connector.dart';
 import '../../../helper/network.dart';
 import 'macro_editor.dart';
 import 'macro_images.dart';
-import 'macro_layout.dart';
+import 'macro_layout_editor.dart';
 
 class MacroDashboard extends StatefulWidget {
   const MacroDashboard({super.key});
@@ -22,12 +23,6 @@ class MacroDashboard extends StatefulWidget {
 
 class MacroDashboardState extends State<MacroDashboard> {
   bool isSent = false;
-
-  bool isMacroLoaded = false;
-  List macroData = [];
-
-  bool isMacroImageLoaded = false;
-  List kitsuDeckMacroImages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -42,59 +37,6 @@ class MacroDashboardState extends State<MacroDashboard> {
             {"event": "GET_MACRO_IMAGES", "auth_pin": websocket.pin}));
         isSent = true;
       }
-      websocket.stream.listen((event) {
-        Map jsonData = jsonDecode(event);
-        // handle macros
-        if (jsonData["event"] == "GET_MACROS" && !isMacroLoaded) {
-          macroData += jsonData["macros"];
-          if (jsonData["status"] == true && mounted) {
-            setState(() {
-              isMacroLoaded = true;
-            });
-          }
-        }
-        // handle macro images
-        if (jsonData["event"] == "GET_MACRO_IMAGES" && !isMacroImageLoaded) {
-          kitsuDeckMacroImages.clear();
-
-          for (var image in jsonData["images"]) {
-            // delay loading of next image
-            Future.delayed(const Duration(seconds: 1), () async {
-              var imageData = await getMacroImage(
-                  kitsuDeck.ip, websocket.pin, image["name"]);
-              // make a image with rounded corners
-              if (imageData == null || imageData == false) {
-                // create a empty image
-                imageData = IMG.Image(width: 100, height: 100);
-                IMG.fill(imageData, color: IMG.ColorInt16(0x000000));
-                imageData = IMG.encodeJpg(imageData);
-              }
-
-              imageData = ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Image.memory(
-                  imageData,
-                  fit: BoxFit.cover,
-                ),
-              );
-              if (mounted) {
-                setState(() {
-                  kitsuDeckMacroImages.add({
-                    "id": image["id"],
-                    "name": image["name"],
-                    "image": imageData,
-                  });
-                });
-              }
-            });
-            if (mounted) {
-              setState(() {
-                isMacroImageLoaded = true;
-              });
-            }
-          }
-        }
-      });
     }
     return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -147,127 +89,169 @@ class MacroDashboardState extends State<MacroDashboard> {
                         )
                       ],
                     ),
+                    const TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Search Macro',
+                      ),
+                      onChanged: null, //TODO; search macro
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Expanded(
-                        child: Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const TextField(
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Search Macro',
-                                  ),
-                                  onChanged: null, //TODO; search macro
-                                ),
-                                const SizedBox(height: 10),
-                                // stream builder with the websocket stream
-                                Expanded(
-                                    child: SingleChildScrollView(
-                                  child: Wrap(
-                                    spacing: 10,
-                                    runSpacing: 10,
-                                    children: [
-                                      for (var macro in macroData)
-                                        InkWell(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          onTap: () async {
-                                            bool? result =
-                                                await showMacroInfoModal(
-                                                    context,
-                                                    macro,
-                                                    kitsuDeckMacroImages);
-                                            if (result != null && result) {
-                                              setState(() {
-                                                isSent = false;
-                                                isMacroLoaded = false;
-                                                macroData = [];
-                                                isMacroImageLoaded = false;
-                                                kitsuDeckMacroImages = [];
-                                              });
-                                            }
-                                            // TODO: handle macroInfoModal return
-                                          },
-                                          child: Stack(children: [
-                                            Column(
-                                              children: [
-                                                if (macro["image"] == null ||
-                                                    macro["image"] ==
-                                                        null.toString()) ...{
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    child: Image.asset(
-                                                      "assets/images/macro_icon.jpg",
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )
-                                                } else ...{
-                                                  if (kitsuDeckMacroImages
-                                                      .isNotEmpty) ...{
-                                                    for (var image
-                                                        in kitsuDeckMacroImages)
-                                                      if (image["id"] ==
-                                                          macro["image"]) ...{
-                                                        image["image"]
-                                                      }
-                                                  } else ...{
-                                                    const SizedBox(
-                                                        width: 100,
-                                                        height: 100,
-                                                        child: Center(
-                                                            child:
-                                                                CircularProgressIndicator()))
-                                                  }
-                                                },
-                                              ],
+                      child: StreamBuilder(
+                          stream: websocket.stream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              Map jsonData =
+                                  jsonDecode(snapshot.data.toString());
+                              // load macro Data
+                              if (jsonData["event"] == "GET_MACROS" &&
+                                  !kitsuDeck.isMacroDataLoaded) {
+                                List macroData = kitsuDeck.macroData;
+                                for (var macro in jsonData["macros"]) {
+                                  macroData.add(macro);
+                                }
+                                if (jsonData["status"] == true) {
+                                  kitsuDeck.setIsMacroDataLoaded(true);
+                                }
+                              }
+                              if (jsonData["event"] == "GET_MACRO_IMAGES" &&
+                                  !kitsuDeck.isMacroImagesLoaded) {
+                                for (var image in jsonData["images"]) {
+                                  // delay loading of next image
+                                  Future.delayed(const Duration(seconds: 1),
+                                      () async {
+                                    var imageData = await getMacroImage(
+                                        kitsuDeck.ip,
+                                        websocket.pin,
+                                        image["name"]);
+                                    // make a image with rounded corners
+                                    if (imageData == null ||
+                                        imageData == false) {
+                                      // create a empty image
+                                      imageData =
+                                          IMG.Image(width: 100, height: 100);
+                                      IMG.fill(imageData,
+                                          color: IMG.ColorInt16(0x000000));
+                                      imageData = IMG.encodeJpg(imageData);
+                                    }
+                                    imageData = ClipRRect(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      child: Image.memory(
+                                        imageData,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                    if (mounted) {
+                                      List<dynamic> kitsuDeckMacroImages =
+                                          kitsuDeck.macroImages;
+                                      kitsuDeckMacroImages =
+                                          kitsuDeck.macroImages;
+                                      kitsuDeckMacroImages.add({
+                                        "id": image["id"],
+                                        "name": image["name"],
+                                        "image": imageData,
+                                      });
+                                      kitsuDeck
+                                          .setMacroImages(kitsuDeckMacroImages);
+                                    }
+                                  });
+                                  if (mounted) {
+                                    kitsuDeck.setIsMacroImagesLoaded(true);
+                                  }
+                                }
+                              }
+                              return Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: [
+                                  for (var macro in kitsuDeck.macroData)
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Stack(children: [
+                                        for (var image in kitsuDeck.macroImages)
+                                          if (image["id"] ==
+                                              macro["image"]) ...[
+                                            image["image"],
+                                          ] else ...[
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.asset(
+                                                "assets/images/macro_icon.jpg",
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
-                                            // TODO: add tooltip
-                                            Positioned(
-                                                bottom: 0,
-                                                child: Container(
-                                                  width: 100,
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        const BorderRadius.only(
-                                                            bottomLeft:
-                                                                Radius.circular(
-                                                                    10),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                    10)),
-                                                    color: Colors.black
-                                                        .withOpacity(0.5),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 5),
-                                                  child: Text(
-                                                    macro["name"],
-                                                    maxLines: 1,
-                                                    style: const TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ))
-                                          ]),
-                                        )
-                                    ],
-                                  ),
-                                ))
+                                          ],
+                                        Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color:
+                                                Colors.black.withOpacity(0.35),
+                                          ),
+                                          child: InkWell(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(10)),
+                                              onTap: () async {
+                                                await showMacroInfoModal(
+                                                    context, macro);
+                                              },
+                                              child: Center(
+                                                child: Text(
+                                                  macro["name"],
+                                                  maxLines: 1,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              )),
+                                        ),
+                                      ]),
+                                    )
+                                ],
+                              );
+                            }
+
+                            return const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                Text("Loading Macros...")
                               ],
-                            ))),
+                            );
+                          }),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           TextButton(
+                              onPressed: () {
+                                kitsuDeck.setMacroDataNull();
+                                setState(() {
+                                  isSent = false;
+                                });
+                              },
+                              child: const Row(children: [
+                                Icon(Icons.refresh),
+                                Text("Refresh Macros")
+                              ])),
+                          TextButton(
                               onPressed: () async {
-                                kitsuDeckMacroImages.clear();
                                 bool? result =
                                     await showMacroEditorModal(context);
                                 if (result! == true) {
@@ -277,12 +261,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                                   );
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
-                                  setState(() {
-                                    macroData.clear();
-                                    isMacroImageLoaded = false;
-                                    isMacroLoaded = false;
-                                    isSent = false;
-                                  });
+                                  kitsuDeck.setMacroDataNull();
                                 }
                               },
                               child: const Row(children: [
@@ -293,24 +272,21 @@ class MacroDashboardState extends State<MacroDashboard> {
                               onPressed: () async {
                                 await showMacroImagesModal(context, false);
                                 // refresh the site
-                                setState(() {
-                                  macroData.clear();
-                                  isMacroImageLoaded = false;
-                                  isMacroLoaded = false;
-                                  isSent = false;
-                                });
+                                kitsuDeck.setMacroDataNull();
                               },
                               child: const Row(children: [
                                 Icon(Icons.image_search_outlined),
                                 Text("Macro Images")
                               ])),
                           TextButton(
-                              onPressed: isMacroImageLoaded &&
-                                      isMacroLoaded &&
-                                      macroData.isNotEmpty
+                              onPressed: kitsuDeck.isMacroImagesLoaded &&
+                                      kitsuDeck.isMacroDataLoaded &&
+                                      kitsuDeck.macroData.isNotEmpty
                                   ? () {
-                                      showMacroLayoutEditorModal(context,
-                                          macroData, kitsuDeckMacroImages);
+                                      showMacroLayoutEditorModal(
+                                          context,
+                                          kitsuDeck.macroData,
+                                          kitsuDeck.macroImages);
                                     }
                                   : null,
                               child: const Row(children: [
@@ -343,9 +319,7 @@ showMacroDashboard(BuildContext context) {
 
 class MacroInfoModal extends StatefulWidget {
   final Map macro;
-  final List macroImages;
-  const MacroInfoModal(
-      {super.key, required this.macro, required this.macroImages});
+  const MacroInfoModal({super.key, required this.macro});
 
   @override
   MacroInfoModalState createState() => MacroInfoModalState();
@@ -358,6 +332,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
   @override
   Widget build(BuildContext context) {
     final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<KitsuDeck>(context);
     if (websocket.isConnected && !isLoaded && mounted) {
       if (!isSent) {
         websocket.send(jsonEncode({
@@ -400,8 +375,8 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                   ),
                 )
               } else ...{
-                if (widget.macroImages.isNotEmpty) ...{
-                  for (var image in widget.macroImages)
+                if (kitsuDeck.macroImages.isNotEmpty) ...{
+                  for (var image in kitsuDeck.macroImages)
                     if (image["id"] == widget.macro["image"]) ...{
                       image["image"]
                     }
@@ -472,7 +447,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                 ),
               );
 
-              for (var img in widget.macroImages) {
+              for (var img in kitsuDeck.macroImages) {
                 if (img["id"] == macroData["image"]) {
                   image = img["image"];
                 }
@@ -497,8 +472,7 @@ class MacroInfoModalState extends State<MacroInfoModal> {
   }
 }
 
-Future<bool?> showMacroInfoModal(
-    BuildContext context, Map macro, List macroImages) async {
+Future<bool?> showMacroInfoModal(BuildContext context, Map macro) async {
   return await showGeneralDialog(
     context: context,
     barrierDismissible: true,
@@ -509,7 +483,6 @@ Future<bool?> showMacroInfoModal(
         Animation secondaryAnimation) {
       return MacroInfoModal(
         macro: macro,
-        macroImages: macroImages,
       );
     },
   );

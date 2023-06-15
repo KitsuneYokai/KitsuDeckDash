@@ -67,7 +67,7 @@ class DeckWebsocket extends ChangeNotifier {
           _streamController.add(data);
           if (kDebugMode) {
             // Print every event in debug mode
-            print("Received from websocket: $data");
+            // print("Received from websocket: $data");
           }
 
           Map jsonData = jsonDecode(data);

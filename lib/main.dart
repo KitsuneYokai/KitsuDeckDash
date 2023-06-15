@@ -81,8 +81,8 @@ void main() async {
 
   WindowOptions windowOptions = const WindowOptions(
     title: 'DeckDash',
-    size: Size(800, 600),
-    minimumSize: Size(800, 600),
+    size: Size(900, 600),
+    minimumSize: Size(900, 600),
     center: true,
     backgroundColor: Colors.transparent,
     titleBarStyle: TitleBarStyle.hidden,

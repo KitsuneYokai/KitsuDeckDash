@@ -15,29 +15,34 @@ class MacroLayoutEditor extends StatefulWidget {
 }
 
 class MacroLayoutEditorState extends State<MacroLayoutEditor> {
-  int _maxMacroPerPage = 20; // max macro per page
+  final int _maxMacroPerPage = 20; // max macro per page
   int _currentMacroPage =
       0; // current macro page if 0 = first page 1-20, if 1-99: X*_maxMacro + macroPosition(1-20)
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> macroWidgets = [];
+    List macroWidgets = [];
+    List newMacroWidgets = [];
 
     var maxPosition = _currentMacroPage * _maxMacroPerPage;
 
     for (var i = 1; i <= _maxMacroPerPage; i++) {
-      String macroName =
-          (i + maxPosition).toString(); // Initialize with default value
+      Map macroMap = {
+        "id": null,
+        "name": "",
+        "image": null,
+        "layout_position": (i + maxPosition).toString(),
+      }; // Initialize with default value
 
       for (var macro in widget.macroData) {
         var layoutPosition = macro["layout_position"];
         if (layoutPosition == (i + maxPosition).toString()) {
-          macroName = macro["name"];
+          macroMap = macro;
           break;
         }
       }
-
-      macroWidgets.add(Text(macroName));
+      macroWidgets.add(macroMap);
+      newMacroWidgets.add(macroMap);
     }
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -186,14 +191,101 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                               child: const Icon(Icons.arrow_forward)),
                         ],
                       ),
-                      Expanded(
-                          child: GridView.count(
-                              physics: NeverScrollableScrollPhysics(),
-                              crossAxisCount: 5,
-                              children: macroWidgets))
+                      Flexible(
+                          child: Center(
+                        child: SizedBox(
+                            width: 550,
+                            child: Wrap(spacing: 10, runSpacing: 5, children: [
+                              for (var macro in macroWidgets) ...[
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    // background color
+                                    color: Colors.black.withOpacity(0.3),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      if (macro["image"] != null ||
+                                          macro["image"] !=
+                                              null.toString()) ...[
+                                        for (var image
+                                            in widget.kitsuDeckMacroImages) ...[
+                                          if (image["id"] ==
+                                              macro["image"]) ...[
+                                            image["image"]
+                                          ]
+                                        ]
+                                      ],
+                                      // show macro name
+                                      if (macro["name"] != "" &&
+                                          (macro["image"] == "null" ||
+                                              macro["image"] ==
+                                                  null.toString()))
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.asset(
+                                            "assets/images/macro_icon.jpg",
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      if (macro["name"] != "")
+                                        Center(
+                                            child: Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            // background color
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              macro["name"],
+                                              maxLines: 1,
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20),
+                                            ),
+                                          ),
+                                        )),
+                                      // show layout position
+                                      Positioned(
+                                          child: Container(
+                                              width: 35,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                // background color
+                                                color: Colors.black
+                                                    .withOpacity(0.4),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  macro["layout_position"],
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ))),
+                                    ],
+                                  ),
+                                )
+                              ]
+                            ])),
+                      ))
                     ]))
                   ],
-                ))
+                )),
+                if (macroWidgets != newMacroWidgets) ...[
+                  const Text("maradjatok gyedekek")
+                ]
               ],
             ),
           ),
