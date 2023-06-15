@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -223,7 +222,6 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 ],
                               );
                             }
-
                             return const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -283,10 +281,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                                       kitsuDeck.isMacroDataLoaded &&
                                       kitsuDeck.macroData.isNotEmpty
                                   ? () {
-                                      showMacroLayoutEditorModal(
-                                          context,
-                                          kitsuDeck.macroData,
-                                          kitsuDeck.macroImages);
+                                      showMacroLayoutEditorModal(context);
                                     }
                                   : null,
                               child: const Row(children: [

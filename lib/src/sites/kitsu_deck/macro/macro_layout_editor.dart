@@ -1,14 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-class MacroLayoutEditor extends StatefulWidget {
-  final List macroData;
-  final List kitsuDeckMacroImages;
+import '../../../classes/kitsu_deck/device.dart';
 
-  const MacroLayoutEditor(
-      {super.key, required this.macroData, required this.kitsuDeckMacroImages});
+class MacroLayoutEditor extends StatefulWidget {
+  const MacroLayoutEditor({super.key});
 
   @override
   MacroLayoutEditorState createState() => MacroLayoutEditorState();
@@ -21,6 +20,8 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final kitsuDeck = Provider.of<KitsuDeck>(context);
+
     List macroWidgets = [];
     List newMacroWidgets = [];
 
@@ -34,7 +35,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
         "layout_position": (i + maxPosition).toString(),
       }; // Initialize with default value
 
-      for (var macro in widget.macroData) {
+      for (var macro in kitsuDeck.macroData) {
         var layoutPosition = macro["layout_position"];
         if (layoutPosition == (i + maxPosition).toString()) {
           macroMap = macro;
@@ -114,7 +115,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                         Flexible(
                             child: SingleChildScrollView(
                           child: Wrap(runSpacing: 10, spacing: 10, children: [
-                            for (var macro in widget.macroData) ...[
+                            for (var macro in kitsuDeck.macroData) ...[
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
@@ -133,7 +134,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                     if (macro["image"] != null ||
                                         macro["image"] != null.toString()) ...[
                                       for (var image
-                                          in widget.kitsuDeckMacroImages) ...[
+                                          in kitsuDeck.macroImages) ...[
                                         if (image["id"] == macro["image"]) ...[
                                           image["image"]
                                         ]
@@ -211,7 +212,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                           macro["image"] !=
                                               null.toString()) ...[
                                         for (var image
-                                            in widget.kitsuDeckMacroImages) ...[
+                                            in kitsuDeck.macroImages) ...[
                                           if (image["id"] ==
                                               macro["image"]) ...[
                                             image["image"]
@@ -283,9 +284,6 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                     ]))
                   ],
                 )),
-                if (macroWidgets != newMacroWidgets) ...[
-                  const Text("maradjatok gyedekek")
-                ]
               ],
             ),
           ),
@@ -295,8 +293,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
   }
 }
 
-Future<bool?> showMacroLayoutEditorModal(
-    BuildContext context, List macroData, List kitsuDeckMacroImages) async {
+Future<bool?> showMacroLayoutEditorModal(BuildContext context) async {
   return await showGeneralDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -305,10 +302,7 @@ Future<bool?> showMacroLayoutEditorModal(
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (BuildContext buildContext, Animation animation,
         Animation secondaryAnimation) {
-      return MacroLayoutEditor(
-        macroData: macroData,
-        kitsuDeckMacroImages: kitsuDeckMacroImages,
-      );
+      return MacroLayoutEditor();
     },
   );
 }
