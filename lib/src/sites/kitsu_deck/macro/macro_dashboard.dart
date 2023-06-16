@@ -36,6 +36,15 @@ class MacroDashboardState extends State<MacroDashboard> {
             {"event": "GET_MACRO_IMAGES", "auth_pin": websocket.pin}));
         isSent = true;
       }
+      websocket.stream.listen((event) {
+        Map jsonData = jsonDecode(event.toString());
+        if (jsonData["event"] == "UPDATE_MACRO_LAYOUT") {
+          kitsuDeck.setMacroDataNull();
+          setState(() {
+            isSent = false;
+          });
+        }
+      });
     }
     return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -166,6 +175,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                                   }
                                 }
                               }
+
                               return Wrap(
                                 spacing: 10,
                                 runSpacing: 10,
@@ -280,6 +290,9 @@ class MacroDashboardState extends State<MacroDashboard> {
                                   ScaffoldMessenger.of(context)
                                       .showSnackBar(snackBar);
                                   kitsuDeck.setMacroDataNull();
+                                  setState(() {
+                                    isSent = false;
+                                  });
                                 }
                               },
                               child: const Row(children: [
@@ -291,6 +304,9 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 await showMacroImagesModal(context, false);
                                 // refresh the site
                                 kitsuDeck.setMacroDataNull();
+                                setState(() {
+                                  isSent = false;
+                                });
                               },
                               child: const Row(children: [
                                 Icon(Icons.image_search_outlined),
