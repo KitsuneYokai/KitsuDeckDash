@@ -39,7 +39,9 @@ class MacroDashboardState extends State<MacroDashboard> {
       websocket.stream.listen((event) {
         Map jsonData = jsonDecode(event.toString());
         if (jsonData["event"] == "UPDATE_MACRO_LAYOUT") {
-          kitsuDeck.setMacroDataNull();
+          kitsuDeck.setMacroData([]);
+          kitsuDeck.setIsMacroDataLoaded(false);
+
           setState(() {
             isSent = false;
           });
@@ -123,6 +125,10 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 }
                                 if (jsonData["status"] == true) {
                                   kitsuDeck.setIsMacroDataLoaded(true);
+                                  Future.delayed(const Duration(seconds: 0),
+                                      () async {
+                                    kitsuDeck.notify();
+                                  });
                                 }
                               }
                               if (jsonData["event"] == "GET_MACRO_IMAGES" &&
@@ -133,7 +139,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 }
                                 for (var image in jsonData["images"]) {
                                   // delay loading of next image
-                                  Future.delayed(const Duration(seconds: 1),
+                                  Future.delayed(const Duration(seconds: 0),
                                       () async {
                                     var imageData = await getMacroImage(
                                         kitsuDeck.ip,
@@ -175,7 +181,6 @@ class MacroDashboardState extends State<MacroDashboard> {
                                   }
                                 }
                               }
-
                               return Wrap(
                                 spacing: 10,
                                 runSpacing: 10,
@@ -313,8 +318,7 @@ class MacroDashboardState extends State<MacroDashboard> {
                                 Text("Macro Images")
                               ])),
                           TextButton(
-                              onPressed: kitsuDeck.isMacroImagesLoaded &&
-                                      kitsuDeck.isMacroDataLoaded &&
+                              onPressed: kitsuDeck.isMacroDataLoaded &&
                                       kitsuDeck.macroData.isNotEmpty
                                   ? () {
                                       showMacroLayoutEditorModal(context);

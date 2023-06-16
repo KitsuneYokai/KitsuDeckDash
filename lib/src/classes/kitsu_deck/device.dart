@@ -92,4 +92,8 @@ class KitsuDeck extends ChangeNotifier {
     _macroImages = data;
     notifyListeners();
   }
+
+  notify() {
+    notifyListeners();
+  }
 }

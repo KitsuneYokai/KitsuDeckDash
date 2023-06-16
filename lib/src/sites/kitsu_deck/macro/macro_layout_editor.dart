@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -202,7 +201,6 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                         )),
                       ]),
                     ),
-                    // TODO: layout Editor starts here
                     Expanded(
                         child: Column(children: [
                       Row(
@@ -237,7 +235,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                 if (value != "" &&
                                     value != null.toString() &&
                                     value != "0" &&
-                                    int.parse(value) <= 499) {
+                                    int.parse(value) <= 100) {
                                   setState(() {
                                     _currentMacroPage = int.parse(value) - 1;
                                   });
@@ -259,7 +257,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                     .secondary, // foreground
                               ),
                               onPressed: () {
-                                if (_currentMacroPage < 498) {
+                                if (_currentMacroPage < 99) {
                                   _currentMacroPage++;
 
                                   setState(() {
@@ -318,7 +316,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
-                                            if (macro["name"] != "")
+                                            if (macro["name"] != "") ...[
                                               Center(
                                                   child: Container(
                                                 width: 100,
@@ -342,6 +340,49 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                                   ),
                                                 ),
                                               )),
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      shadowColor:
+                                                          Colors.transparent,
+                                                      elevation: 0,
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize:
+                                                          const Size(2, 2),
+                                                      shape: const RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          5)))),
+                                                  child: const Padding(
+                                                    padding: EdgeInsets.all(3),
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      size: 20,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                  onPressed: () async {
+                                                    int layoutPosition =
+                                                        int.parse(macro[
+                                                            "layout_position"]);
+                                                    websocket.send(jsonEncode({
+                                                      "event":
+                                                          "UPDATE_MACRO_LAYOUT",
+                                                      "auth_pin": websocket.pin,
+                                                      "macro_id": "Null",
+                                                      "layout_position":
+                                                          layoutPosition
+                                                    }));
+                                                  },
+                                                ),
+                                              )
+                                            ],
                                             // show layout position
                                             Positioned(
                                                 child: Container(
