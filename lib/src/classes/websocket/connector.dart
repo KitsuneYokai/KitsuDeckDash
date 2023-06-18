@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
+
+import 'package:keypress_simulator/keypress_simulator.dart';
 
 class DeckWebsocket extends ChangeNotifier {
   // DeckWebsocket websocket constructor
@@ -67,7 +70,7 @@ class DeckWebsocket extends ChangeNotifier {
           _streamController.add(data);
           if (kDebugMode) {
             // Print every event in debug mode
-            // print("Received from websocket: $data");
+            print("Received from websocket: $data");
           }
 
           Map jsonData = jsonDecode(data);
@@ -95,6 +98,21 @@ class DeckWebsocket extends ChangeNotifier {
             if (kDebugMode) {
               print("Client auth failed");
             }
+          }
+
+          // handle Macro Invoked event
+          if (jsonData["event"] == "MACRO_INVOKED") {
+            Map jsonAction = jsonDecode(jsonData["action"]);
+
+            Future.delayed(const Duration(milliseconds: 5), () async {
+              await keyPressSimulator.requestAccess();
+              for (var key in jsonAction["action"]) {
+                // convert the key to LogicalKeyboardKey
+                await keyPressSimulator.simulateKeyPress(
+                  key: LogicalKeyboardKey.findKeyByKeyId(key["code"]),
+                );
+              }
+            });
           }
 
           // Handle the events

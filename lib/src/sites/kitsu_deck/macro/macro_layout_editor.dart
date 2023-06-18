@@ -21,8 +21,9 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
   int _currentMacroPage =
       0; // current macro page if 0 = first page 1-20, if 1-99: X*_maxMacro + macroPosition(1-20)
 
-  TextEditingController _macroPageController = TextEditingController();
+  final TextEditingController _macroPageController = TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     _macroPageController.text = (_currentMacroPage + 1).toString();
