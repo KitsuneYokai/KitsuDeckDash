@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kitsu_deck_dash/src/sites/kitsu_deck/index.dart';
-import 'package:kitsu_deck_dash/src/sites/settings/navbar.dart';
+import 'package:kitsu_deck_dash/src/pages/kitsu_deck/index.dart';
+import 'package:kitsu_deck_dash/src/pages/settings/navbar.dart';
 import 'package:window_manager/window_manager.dart';
 
 class MainView extends StatefulWidget {

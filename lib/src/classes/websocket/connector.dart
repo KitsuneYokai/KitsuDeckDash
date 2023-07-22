@@ -103,14 +103,47 @@ class DeckWebsocket extends ChangeNotifier {
           // handle Macro Invoked event
           if (jsonData["event"] == "MACRO_INVOKED") {
             Map jsonAction = jsonDecode(jsonData["action"]);
+            Future.delayed(const Duration(milliseconds: 10), () async {
+              if (!await keyPressSimulator.isAccessAllowed()) {
+                await keyPressSimulator.requestAccess();
+              }
 
-            Future.delayed(const Duration(milliseconds: 5), () async {
-              await keyPressSimulator.requestAccess();
               for (var key in jsonAction["action"]) {
-                // convert the key to LogicalKeyboardKey
-                await keyPressSimulator.simulateKeyPress(
-                  key: LogicalKeyboardKey.findKeyByKeyId(key["code"]),
-                );
+                if (key["code"] != null) {
+                  if (key["key"].toString().toLowerCase().contains("meta") ||
+                      key["key"].toString().toLowerCase().contains("ctrl") ||
+                      key["key"].toString().toLowerCase().contains("alt") ||
+                      key["key"].toString().toLowerCase().contains("shift")) {
+                    continue;
+                  } else {
+                    var key_code =
+                        LogicalKeyboardKey.findKeyByKeyId(key["code"]);
+                    if (key_code != null) {
+                      bool isShift = key["shift"];
+                      bool isAlt = key["alt"];
+                      bool isCtrl = key["ctrl"];
+                      bool isMeta = key["meta"];
+
+                      List<ModifierKey> modifiers = [];
+
+                      if (isShift) {
+                        modifiers.add(ModifierKey.shiftModifier);
+                      }
+                      if (isAlt) {
+                        modifiers.add(ModifierKey.altModifier);
+                      }
+                      if (isCtrl) {
+                        modifiers.add(ModifierKey.controlModifier);
+                      }
+                      if (isMeta) {
+                        modifiers.add(ModifierKey.metaModifier);
+                      }
+
+                      await keyPressSimulator.simulateKeyPress(
+                          key: key_code, modifiers: modifiers, keyDown: true);
+                    }
+                  }
+                }
               }
             });
           }

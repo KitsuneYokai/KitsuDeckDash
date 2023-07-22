@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kitsu_deck_dash/src/sites/kitsu_deck/macro/macro_images.dart';
+import 'package:kitsu_deck_dash/src/pages/kitsu_deck/macro/macro_images.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -76,19 +76,84 @@ class MacroEditorModalState extends State<MacroEditorModal> {
   TextEditingController macroNameController = TextEditingController();
   TextEditingController macroDescriptionController = TextEditingController();
   void _handleKeyDownEvent(RawKeyEvent event) {
+    // define some variables to build the json object
+    String key = event.logicalKey.keyLabel;
+    int keyCode = event.logicalKey.keyId;
+
+    bool isShiftPressed = event.isShiftPressed;
+    bool isAltPressed = event.isAltPressed;
+    bool isControlPressed = event.isControlPressed;
+    bool isMetaPressed = event.isMetaPressed;
+
+    bool isRepeat = event.repeat;
+
+    Map macroMap = {
+      "key": null,
+      "code": null,
+      "shift": null,
+      "ctrl": null,
+      "alt": null,
+      "meta": null
+    };
+
+    if (isShiftPressed) {
+      key = key.toUpperCase();
+    } else {
+      key = key.toLowerCase();
+    }
+
+    if (key == " ") {
+      key = "SPACE";
+    }
+    // if shift, ctrl, alt or meta is pressed, add it to the array, don't record keys,
+    // keys are recorded using the Raw key up event, this is to avoid recording the key twice,
+    // and have an identifier for the modifier keys (e.g. shift down H E L L O shift up SPACE w h a t s u p)
+
     if (event is RawKeyDownEvent) {
-      // if keys are pressed down then add them to the macroRecording list
-      setState(() {
-        var key = event.logicalKey.keyLabel;
-        var code = event.logicalKey.keyId;
-        if (key == " ") {
-          key = "SPACE";
+      // don't record the key if it's a repeated event
+      if (!isRepeat) {
+        // only record the key if its a modifier key
+        if (key.toLowerCase().contains("shift") ||
+            key.toLowerCase().contains("ctrl") ||
+            key.toLowerCase().contains("alt") ||
+            key.toLowerCase().contains("meta")) {
+          key += " down";
+
+          macroMap["key"] = key;
+          macroMap["code"] = keyCode;
+          macroMap["shift"] = isShiftPressed;
+          macroMap["ctrl"] = isControlPressed;
+          macroMap["alt"] = isAltPressed;
+          macroMap["meta"] = isMetaPressed;
+
+          setState(() {
+            macroRecording = [...macroRecording, macroMap];
+          });
         }
-        macroRecording = [
-          ...macroRecording,
-          {"key": key, "code": code}
-        ];
-      });
+      }
+    }
+
+    if (event is RawKeyUpEvent) {
+      print(event.logicalKey.keyId);
+      // don't record the key if it's a repeated event
+      if (!isRepeat) {
+        if (key.toLowerCase().contains("shift") ||
+            key.toLowerCase().contains("ctrl") ||
+            key.toLowerCase().contains("alt") ||
+            key.toLowerCase().contains("meta")) {
+          key += " up";
+        }
+        macroMap["key"] = key;
+        macroMap["code"] = keyCode;
+        macroMap["shift"] = isShiftPressed;
+        macroMap["ctrl"] = isControlPressed;
+        macroMap["alt"] = isAltPressed;
+        macroMap["meta"] = isMetaPressed;
+        // set the state
+        setState(() {
+          macroRecording = [...macroRecording, macroMap];
+        });
+      }
     }
   }
 
