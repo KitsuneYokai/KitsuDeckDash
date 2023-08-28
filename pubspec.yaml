@@ -23,7 +23,7 @@ dependencies:
   shared_preferences: ^2.2.0
   system_tray: ^2.0.2
   web_socket_channel: ^2.3.0
-  window_manager: ^0.3.5
+  window_manager: ^0.3.6
 
 dev_dependencies:
   flutter_test:
