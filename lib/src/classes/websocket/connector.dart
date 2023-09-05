@@ -116,9 +116,9 @@ class DeckWebsocket extends ChangeNotifier {
                       key["key"].toString().toLowerCase().contains("shift")) {
                     continue;
                   } else {
-                    var key_code =
+                    var keyCode =
                         LogicalKeyboardKey.findKeyByKeyId(key["code"]);
-                    if (key_code != null) {
+                    if (keyCode != null) {
                       bool isShift = key["shift"];
                       bool isAlt = key["alt"];
                       bool isCtrl = key["ctrl"];
@@ -140,7 +140,7 @@ class DeckWebsocket extends ChangeNotifier {
                       }
 
                       await keyPressSimulator.simulateKeyPress(
-                          key: key_code, modifiers: modifiers, keyDown: true);
+                          key: keyCode, modifiers: modifiers, keyDown: true);
                     }
                   }
                 }
