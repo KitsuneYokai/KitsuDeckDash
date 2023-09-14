@@ -11,9 +11,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:image/image.dart' as IMG;
 
-import '../../../classes/kitsu_deck/device.dart';
-import '../../../classes/websocket/connector.dart';
-import '../../../helper/network.dart';
+import '../../../../classes/websocket/connector.dart';
+import '../../../../helper/network.dart';
 
 class MacroImagesModal extends StatefulWidget {
   const MacroImagesModal({super.key, required this.isSelectable});
@@ -39,16 +38,16 @@ class MacroImagesModalState extends State<MacroImagesModal> {
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
+
     if (!_isLoading && !_isLoaded) {
       _isLoading = true;
-      websocket.send(
+      kitsuDeck.send(
         jsonEncode(
-          {"event": "GET_MACRO_IMAGES", "auth_pin": websocket.pin},
+          {"event": "GET_MACRO_IMAGES", "auth_pin": kitsuDeck.pin},
         ),
       );
-      websocket.stream.firstWhere((event) {
+      kitsuDeck.stream.firstWhere((event) {
         Map jsonData = jsonDecode(event);
         if (jsonData["event"] == "GET_MACRO_IMAGES") {
           if (jsonData["images"].length > 0) {
@@ -56,7 +55,7 @@ class MacroImagesModalState extends State<MacroImagesModal> {
               // delay loading of next image
               Future.delayed(const Duration(seconds: 1), () async {
                 var imageData = await getMacroImage(
-                    kitsuDeck.ip, websocket.pin, image["name"]);
+                    kitsuDeck.ip, kitsuDeck.pin, image["name"]);
                 // make a image with rounded corners
                 if (imageData == null || imageData == false) {
                   // create a empty image
@@ -78,7 +77,7 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                     _kitsuDeckMacroImages.add({
                       "id": image["id"],
                       "name": image["name"],
-                      "image": imageData,
+                      "image_widget": imageData,
                     });
                     if (jsonData["images"].indexOf(image) ==
                         jsonData["images"].length - 1) {
@@ -219,7 +218,7 @@ class MacroImagesModalState extends State<MacroImagesModal> {
                                 ),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(15),
-                                  child: image["image"],
+                                  child: image["image_widget"],
                                   onTap: widget.isSelectable
                                       ? () {
                                           setState(() {
@@ -336,9 +335,9 @@ class DeleteMacroImageModal extends StatefulWidget {
 class DeleteMacroImageModalState extends State<DeleteMacroImageModal> {
   @override
   Widget build(BuildContext context) {
-    final websocket = Provider.of<DeckWebsocket>(context);
-    if (websocket.isConnected) {
-      websocket.stream.firstWhere((event) {
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
+    if (kitsuDeck.isConnected) {
+      kitsuDeck.stream.firstWhere((event) {
         Map jsonData = jsonDecode(event);
         if (jsonData["event"] == "DELETE_MACRO_IMAGE") {
           if (jsonData["status"] == true) {
@@ -363,7 +362,7 @@ class DeleteMacroImageModalState extends State<DeleteMacroImageModal> {
           children: [
             const Text("Do you really want to delete this image?"),
             const SizedBox(height: 10),
-            widget.image["image"]
+            widget.image["image_widget"]
           ]),
       actions: [
         TextButton(
@@ -374,9 +373,9 @@ class DeleteMacroImageModalState extends State<DeleteMacroImageModal> {
         ),
         TextButton(
           onPressed: () {
-            websocket.send(jsonEncode({
+            kitsuDeck.send(jsonEncode({
               "event": "DELETE_MACRO_IMAGE",
-              "auth_pin": websocket.pin,
+              "auth_pin": kitsuDeck.pin,
               "image_id": widget.image["id"]
             }));
           },
@@ -618,8 +617,7 @@ class MacroImagesUploadConfirmModalState
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -683,7 +681,7 @@ class MacroImagesUploadConfirmModalState
                       filename: "$filename.jpg",
                     );
                     // replace empty pin with NULL so the server knows it is empty
-                    String websocketPin = websocket.pin.toString();
+                    String websocketPin = kitsuDeck.pin.toString();
                     if (websocketPin.isEmpty) {
                       websocketPin = "NULL";
                     }

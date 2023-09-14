@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:kitsu_deck_dash/src/classes/websocket/connector.dart';
 import 'package:provider/provider.dart';
 
-import '../../classes/kitsu_deck/device.dart';
-import '../../classes/websocket/connector.dart';
 import 'auth_device.dart';
 import 'no_device.dart';
 
@@ -25,19 +24,18 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
 
     if (kitsuDeck.hostname != null.toString() &&
         kitsuDeck.ip != null.toString()) {
       _hostnameController.text = kitsuDeck.hostname!.split("-")[1];
-      if (!websocket.isConnected) {
+      if (!kitsuDeck.isConnected) {
         _isInit = false;
       }
-      if (websocket.isConnected && !_isInit) {
-        websocket.send(jsonEncode({"event": "GET_BRIGHTNESS"}));
+      if (kitsuDeck.isConnected && !_isInit) {
+        kitsuDeck.send(jsonEncode({"event": "GET_BRIGHTNESS"}));
 
-        websocket.stream.firstWhere((event) {
+        kitsuDeck.stream.firstWhere((event) {
           Map jsonData = jsonDecode(event);
           if (jsonData["event"] == "GET_BRIGHTNESS") {
             if (mounted) {
@@ -127,10 +125,10 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                                         style: TextStyle(color: Colors.white),
                                       ),
                                       Icon(
-                                        websocket.isConnected
+                                        kitsuDeck.isConnected
                                             ? Icons.check_circle
                                             : Icons.cancel,
-                                        color: websocket.isConnected
+                                        color: kitsuDeck.isConnected
                                             ? Colors.green
                                             : Colors.red,
                                       ),
@@ -144,10 +142,10 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                                         style: TextStyle(color: Colors.white),
                                       ),
                                       Icon(
-                                        websocket.isSecured
+                                        kitsuDeck.isSecured
                                             ? Icons.check_circle
                                             : Icons.cancel,
-                                        color: websocket.isSecured
+                                        color: kitsuDeck.isSecured
                                             ? Colors.green
                                             : Colors.red,
                                       ),
@@ -161,20 +159,22 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                                         style: TextStyle(color: Colors.white),
                                       ),
                                       Icon(
-                                        websocket.isAuthed
+                                        kitsuDeck.isAuthed
                                             ? Icons.check_circle
                                             : Icons.cancel,
-                                        color: websocket.isAuthed
+                                        color: kitsuDeck.isAuthed
                                             ? Colors.green
                                             : Colors.red,
                                       ),
                                     ],
                                   ),
+                                  Spacer(),
+                                  Text("TODO: Add clock UTC offset")
                                 ],
                               ),
-                              if (!websocket.isConnected &&
-                                  websocket.isSecured &&
-                                  !websocket.isAuthed)
+                              if (!kitsuDeck.isConnected &&
+                                  kitsuDeck.isSecured &&
+                                  !kitsuDeck.isAuthed)
                                 ElevatedButton(
                                     onPressed: () async {
                                       showAuthenticateKitsuDeck(context);
@@ -183,7 +183,7 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                             ],
                           ),
                         ),
-                        if (websocket.isConnected) ...{
+                        if (kitsuDeck.isConnected) ...{
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -202,10 +202,10 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                                       if (newValue < 10) {
                                         newValue = 10;
                                       }
-                                      websocket.send(jsonEncode({
+                                      kitsuDeck.send(jsonEncode({
                                         "event": "SET_BRIGHTNESS",
                                         "value": "${newValue.round()}",
-                                        "auth_pin": websocket.pin
+                                        "auth_pin": kitsuDeck.pin
                                       }));
                                       setState(() {
                                         _brightness = value;
@@ -219,9 +219,11 @@ class KitsuDeckSettingsState extends State<KitsuDeckSettings> {
                         const Spacer(),
                         ElevatedButton(
                           onPressed: () async {
-                            websocket.disconnect();
+                            kitsuDeck.disconnect();
                             await kitsuDeck.removeKitsuDeckSettings();
-                            setState(() {});
+                            setState(() {
+                              _isInit = false;
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,

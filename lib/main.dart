@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:kitsu_deck_dash/src/classes/kitsu_deck/device.dart';
 import 'package:kitsu_deck_dash/src/classes/websocket/connector.dart';
 import 'package:provider/provider.dart';
 import 'package:system_tray/system_tray.dart';
@@ -94,21 +93,17 @@ void main() async {
   });
 
   // initialize the KitsuDeck class with the shared preferences settings
-  final kitsuDeck = KitsuDeck();
+  final kitsuDeck = DeckWebsocket();
   await kitsuDeck.initKitsuDeckSettings();
 
-  final websocket = DeckWebsocket();
-
   if (kitsuDeck.ip != null.toString()) {
-    websocket.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
+    kitsuDeck.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
   }
-
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<DeckWebsocket>(
-        create: (context) => websocket,
+        create: (context) => kitsuDeck,
       ),
-      ChangeNotifierProvider<KitsuDeck>(create: (context) => kitsuDeck)
     ],
     child: const KitsuDeckDash(),
   ));

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../../helper/network.dart';
 
@@ -48,8 +47,7 @@ class AddKitsuDeckState extends State<AddKitsuDeck> {
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final gateway = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
     return AlertDialog(
         title: Row(children: [
           const Text('Add a KitsuDeck'),
@@ -220,7 +218,7 @@ class AddKitsuDeckState extends State<AddKitsuDeck> {
                           ip,
                           pin,
                         );
-                        gateway.initConnection(
+                        kitsuDeck.initConnection(
                             "ws://$hostname/ws", pin.toString());
                         Navigator.pop(context);
                       },

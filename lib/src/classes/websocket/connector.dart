@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'package:keypress_simulator/keypress_simulator.dart';
+import 'package:keyboard_invoker/keyboard_invoker.dart';
 
-class DeckWebsocket extends ChangeNotifier {
+import '../../helper/macro/image.dart';
+import '../kitsu_deck/device.dart';
+
+class DeckWebsocket extends KitsuDeck {
   // DeckWebsocket websocket constructor
   late StreamController<String> _streamController;
   late IOWebSocketChannel _webSocketChannel;
   late String _url;
-  late String _pin;
   bool _isConnected = false;
   bool _isSecured = false;
   bool _isAuthed = false;
@@ -20,16 +24,10 @@ class DeckWebsocket extends ChangeNotifier {
 
   String get url => _url;
   Stream<String> get stream => _streamController.stream;
-  String get pin => _pin;
   bool get isConnected => _isConnected;
   bool get isSecured => _isSecured;
   bool get isAuthed => _isAuthed;
   bool get breakConnection => _breakConnection;
-
-  void setPin(String pin) {
-    _pin = pin;
-    notifyListeners();
-  }
 
   void setIsConnected(bool isConnected) {
     _isConnected = isConnected;
@@ -62,7 +60,7 @@ class DeckWebsocket extends ChangeNotifier {
       _webSocketChannel = IOWebSocketChannel.connect(url,
           pingInterval: const Duration(seconds: 5));
       _webSocketChannel.stream.listen(
-        (data) {
+        (data) async {
           if (!_isConnected) {
             setIsConnected(true);
             _url = url;
@@ -81,7 +79,7 @@ class DeckWebsocket extends ChangeNotifier {
             if (kDebugMode) {
               print("Sending CLIENT_AUTH");
             }
-            send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": _pin}));
+            send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": pin}));
           }
           if (jsonData["event"] == "CLIENT_AUTH" &&
               jsonData["protected"] == false) {
@@ -90,6 +88,10 @@ class DeckWebsocket extends ChangeNotifier {
           // if the auth was successful
           if (jsonData["event"] == "CLIENT_AUTH_SUCCESS") {
             setIsAuthed(true);
+            _webSocketChannel.sink
+                .add(jsonEncode({"event": "GET_MACROS", "auth_pin": pin}));
+            _webSocketChannel.sink.add(
+                jsonEncode({"event": "GET_MACRO_IMAGES", "auth_pin": pin}));
             if (kDebugMode) {
               print("Client auth success");
             }
@@ -101,9 +103,10 @@ class DeckWebsocket extends ChangeNotifier {
           }
 
           // handle Macro Invoked event
+          // TODO: Use own macro invoker package(keyboard_invoker), cause the one im using now dose not support linux
           if (jsonData["event"] == "MACRO_INVOKED") {
             Map jsonAction = jsonDecode(jsonData["action"]);
-            Future.delayed(const Duration(milliseconds: 10), () async {
+            Future.delayed(const Duration(milliseconds: 50), () async {
               if (!await keyPressSimulator.isAccessAllowed()) {
                 await keyPressSimulator.requestAccess();
               }
@@ -147,7 +150,32 @@ class DeckWebsocket extends ChangeNotifier {
               }
             });
           }
+          if (jsonData["event"] == "GET_MACROS") {
+            print("GET_MACROS");
+            if (jsonData["status"] == true) {
+              List macros = [];
+              for (var macro in jsonData["macros"]) {
+                macros.add(macro);
+              }
+              setMacroData(macros);
+              setIsMacroDataLoaded(true);
+              notify();
+            }
+          }
 
+          if (jsonData["event"] == "GET_MACRO_IMAGES") {
+            setMacroImages(jsonData["images"]);
+            var result =
+                await fetchImage(hostname, pin, macroData, macroImages);
+            print("result: $result");
+            notify();
+          }
+
+          if (jsonData["event"] == "UPDATE_MACRO_LAYOUT") {
+            setMacroData([]);
+            setIsMacroDataLoaded(false);
+            fetchMacroData(_webSocketChannel.sink, pin);
+          }
           // Handle the events
         },
         onError: (error) {

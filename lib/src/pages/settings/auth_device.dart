@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../../helper/network.dart';
 
@@ -16,8 +15,7 @@ class AuthKitsuDeckState extends State<AuthKitsuDeck> {
   final TextEditingController _pinConfigController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
     return AlertDialog(
         title: Row(children: [
           const Text('Authenticate'),
@@ -41,10 +39,10 @@ class AuthKitsuDeckState extends State<AuthKitsuDeck> {
                       if (pinCheck) {
                         await kitsuDeck.setKitsuDeckSettings(
                             kitsuDeck.hostname, kitsuDeck.ip, value);
-                        websocket.setPin(value);
                         kitsuDeck.setPin(value);
-                        if (!websocket.isConnected) {
-                          websocket.initConnection(
+                        kitsuDeck.setPin(value);
+                        if (!kitsuDeck.isConnected) {
+                          kitsuDeck.initConnection(
                               "ws://${kitsuDeck.hostname}/ws", value);
                         }
                         Navigator.pop(context);

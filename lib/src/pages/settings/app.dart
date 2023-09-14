@@ -38,7 +38,7 @@ class AppSettingsState extends State<AppSettings> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Column(
-                    children: [Text("No device added yet")],
+                    children: [Text("Comming Soon 😊")],
                   ))),
         )
       ],

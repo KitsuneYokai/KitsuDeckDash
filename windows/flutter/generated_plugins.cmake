@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  keyboard_invoker
   keypress_simulator
   screen_retriever
   system_tray

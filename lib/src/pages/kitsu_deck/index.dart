@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../classes/kitsu_deck/device.dart';
 import '../../classes/websocket/connector.dart';
 import '../settings/no_device.dart';
-import 'macro/macro_dashboard.dart';
+import 'macro/dashboard/dashboard.dart';
 
 class KitsuDeckDashboard extends StatefulWidget {
   const KitsuDeckDashboard({
@@ -18,9 +17,7 @@ class KitsuDeckDashboard extends StatefulWidget {
 class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
-
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
     if (kitsuDeck.hostname != null.toString() &&
         kitsuDeck.ip != null.toString()) {
       return Expanded(
@@ -63,11 +60,11 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                         ),
                         Text(kitsuDeck.hostname),
                         Icon(
-                          websocket.isConnected
+                          kitsuDeck.isConnected
                               ? Icons.check_circle
                               : Icons.error,
                           color:
-                              websocket.isConnected ? Colors.green : Colors.red,
+                              kitsuDeck.isConnected ? Colors.green : Colors.red,
                         ),
                         const Spacer(),
                         Row(
@@ -77,7 +74,7 @@ class KitsuDeckDashboardState extends State<KitsuDeckDashboard> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.code),
-                                  onPressed: websocket.isConnected
+                                  onPressed: kitsuDeck.isConnected
                                       ? () async {
                                           showMacroDashboard(context);
                                         }

@@ -3,11 +3,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kitsu_deck_dash/src/pages/kitsu_deck/macro/macro_images.dart';
+import 'package:kitsu_deck_dash/src/pages/kitsu_deck/macro/images/images.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../classes/websocket/connector.dart';
+import '../../../../classes/websocket/connector.dart';
 
 const List<String> macroActions = <String>["Macro"];
 
@@ -289,7 +289,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                               SizedBox(
                                   width: 150,
                                   height: 150,
-                                  child: _imageReturn["image"]),
+                                  child: _imageReturn["image_widget"]),
                               const SizedBox(height: 10),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
@@ -340,7 +340,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                       padding:
                           const EdgeInsets.only(left: 20, right: 20, top: 5),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -733,9 +733,9 @@ class MacroEditorConfirmModal extends StatefulWidget {
 class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
   @override
   Widget build(BuildContext context) {
-    final websocket = Provider.of<DeckWebsocket>(context);
-    if (websocket.isConnected) {
-      websocket.stream.firstWhere(
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
+    if (kitsuDeck.isConnected) {
+      kitsuDeck.stream.firstWhere(
         (event) {
           Map jsonData = jsonDecode(event);
           if (jsonData["event"] == "CREATE_MACRO" &&
@@ -803,9 +803,9 @@ class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.macroImageData["image"] != null)
-              widget.macroImageData["image"],
-            if (widget.macroImageData["image"] == null)
+            if (widget.macroImageData["image_widget"] != null)
+              widget.macroImageData["image_widget"],
+            if (widget.macroImageData["image_widget"] == null)
               // load image from assets
               ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
@@ -864,15 +864,15 @@ class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
               if (widget.isDeleteMode != null && widget.isDeleteMode!) {
                 Map jsonData = {
                   "event": "DELETE_MACRO",
-                  "auth_pin": websocket.pin,
+                  "auth_pin": kitsuDeck.pin,
                   "macro_id": widget.macroId
                 };
-                websocket.send(jsonEncode(jsonData));
+                kitsuDeck.send(jsonEncode(jsonData));
                 return;
               } else {
                 Map jsonData = {
                   "event": widget.isEditingMode ? "EDIT_MACRO" : "CREATE_MACRO",
-                  "auth_pin": websocket.pin,
+                  "auth_pin": kitsuDeck.pin,
                   "macro_name": widget.macroName,
                   "macro_description": widget.macroDescription,
                   "macro_action": {
@@ -891,7 +891,7 @@ class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
                     widget.isEditingMode) {
                   jsonData["macro_image_id"] = widget.macroImageData["id"];
                 }
-                websocket.send(jsonEncode(jsonData));
+                kitsuDeck.send(jsonEncode(jsonData));
               }
             },
             child: const Text("Yes")),

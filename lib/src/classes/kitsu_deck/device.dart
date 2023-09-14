@@ -73,7 +73,6 @@ class KitsuDeck extends ChangeNotifier {
     _macroData = [];
     _isMacroDataLoaded = false;
     _isMacroImagesLoaded = false;
-    notifyListeners();
   }
 
   setIsMacroDataLoaded(bool value) {
@@ -90,7 +89,6 @@ class KitsuDeck extends ChangeNotifier {
 
   setMacroImages(data) {
     _macroImages = data;
-    notifyListeners();
   }
 
   notify() {

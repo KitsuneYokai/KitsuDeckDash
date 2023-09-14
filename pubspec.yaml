@@ -24,6 +24,8 @@ dependencies:
   system_tray: ^2.0.2
   web_socket_channel: ^2.3.0
   window_manager: ^0.3.6
+  keyboard_invoker:
+   git: https://github.com/KitsuneYokai/keyboard_invoker
 
 dev_dependencies:
   flutter_test:

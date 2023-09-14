@@ -7,8 +7,6 @@ import 'package:kitsu_deck_dash/src/classes/websocket/connector.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../classes/kitsu_deck/device.dart';
-
 class MacroLayoutEditor extends StatefulWidget {
   const MacroLayoutEditor({super.key});
 
@@ -31,8 +29,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final kitsuDeck = Provider.of<KitsuDeck>(context);
-    final websocket = Provider.of<DeckWebsocket>(context);
+    final kitsuDeck = Provider.of<DeckWebsocket>(context);
 
     List macroWidgets = [];
 
@@ -43,6 +40,7 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
         "id": null,
         "name": "",
         "image": null,
+        "image_widget": null,
         "layout_position": (i + maxPosition).toString(),
       }; // Initialize with default value
 
@@ -162,17 +160,8 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                             fit: BoxFit.cover,
                                           ),
                                         ),
-                                        if (macro["image"] != null ||
-                                            macro["image"] !=
-                                                null.toString()) ...[
-                                          for (var image
-                                              in kitsuDeck.macroImages) ...[
-                                            if (image["id"] ==
-                                                macro["image"]) ...[
-                                              image["image"]
-                                            ]
-                                          ]
-                                        ],
+                                        if (macro["image_widget"] != null)
+                                          macro["image_widget"],
                                         Container(
                                           width: 100,
                                           height: 100,
@@ -293,30 +282,8 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                         ),
                                         child: Stack(
                                           children: [
-                                            if (macro["image"] != null ||
-                                                macro["image"] !=
-                                                    null.toString()) ...[
-                                              for (var image
-                                                  in kitsuDeck.macroImages) ...[
-                                                if (image["id"] ==
-                                                    macro["image"]) ...[
-                                                  image["image"]
-                                                ]
-                                              ]
-                                            ],
-                                            // show macro name
-                                            if (macro["name"] != "" &&
-                                                (macro["image"] == "null" ||
-                                                    macro["image"] ==
-                                                        null.toString()))
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                child: Image.asset(
-                                                  "assets/images/macro_icon.jpg",
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
+                                            if (macro["image_widget"] != null)
+                                              macro["image_widget"],
                                             if (macro["name"] != "") ...[
                                               Center(
                                                   child: Container(
@@ -372,10 +339,10 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                                     int layoutPosition =
                                                         int.parse(macro[
                                                             "layout_position"]);
-                                                    websocket.send(jsonEncode({
+                                                    kitsuDeck.send(jsonEncode({
                                                       "event":
                                                           "UPDATE_MACRO_LAYOUT",
-                                                      "auth_pin": websocket.pin,
+                                                      "auth_pin": kitsuDeck.pin,
                                                       "macro_id": "Null",
                                                       "layout_position":
                                                           layoutPosition
@@ -413,9 +380,9 @@ class MacroLayoutEditorState extends State<MacroLayoutEditor> {
                                 }, onAccept: (data) {
                                   int layoutPosition =
                                       int.parse(macro["layout_position"]);
-                                  websocket.send(jsonEncode({
+                                  kitsuDeck.send(jsonEncode({
                                     "event": "UPDATE_MACRO_LAYOUT",
-                                    "auth_pin": websocket.pin,
+                                    "auth_pin": kitsuDeck.pin,
                                     "macro_id": data,
                                     "layout_position": layoutPosition
                                   }));
