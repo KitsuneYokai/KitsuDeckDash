@@ -21,22 +21,31 @@ String getImagePath(String imageName) {
       : 'assets/images/$imageName.png';
 }
 
+final kitsuDeck = DeckWebsocket();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // initialize the KitsuDeck class with the shared preferences settings
+  await kitsuDeck.initKitsuDeckSettings();
+
+  if (kitsuDeck.ip != null.toString()) {
+    kitsuDeck.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
+  }
+  final version = await getVersion();
+  kitsuDeck.log("KitsuDeckDash Version: ${version}");
   // initialize the system tray
   final AppWindow appWindow = AppWindow();
   final SystemTray systemTray = SystemTray();
   final Menu menuMain = Menu();
 
   Future<void> initSystemTray() async {
-    // We first init the systray menu and then add the menu entries
+    // We first init the sys tray menu and then add the menu entries
     await systemTray.initSystemTray(iconPath: getTrayImagePath('app_icon'));
     systemTray.setTitle("DeckDash");
     systemTray.setToolTip("KitsuDeckDash");
 
     // handle system tray event
     systemTray.registerSystemTrayEventHandler((eventName) {
-      debugPrint("eventName: $eventName");
       if (eventName == kSystemTrayEventClick) {
         Platform.isWindows ? appWindow.show() : systemTray.popUpContextMenu();
       } else if (eventName == kSystemTrayEventRightClick) {
@@ -92,16 +101,6 @@ void main() async {
     await windowManager.focus();
   });
 
-  // initialize the KitsuDeck class with the shared preferences settings
-  final kitsuDeck = DeckWebsocket();
-  await kitsuDeck.initKitsuDeckSettings();
-
-  if (kitsuDeck.ip != null.toString()) {
-    kitsuDeck.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
-  }
-  // get the version of the app using the pubspec.yaml file
-  final version = await getVersion();
-  kitsuDeck.log("KitsuDeckDash V${version} started");
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<DeckWebsocket>(

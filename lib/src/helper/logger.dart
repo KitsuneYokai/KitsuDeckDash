@@ -13,21 +13,21 @@ Future<String> createLogFile() async {
   return logFileName;
 }
 
-Future<void> writeLogToFile(dynamic newData, String logFilePath) async {
+writeLogToFile(dynamic newData, String logFilePath) {
   File logFile = File(logFilePath);
 
-  if (!await logFile.exists()) {
-    await logFile.create(recursive: true);
-    await logFile.writeAsString('[]');
+  if (!logFile.existsSync()) {
+    logFile.createSync(recursive: true);
+    logFile.writeAsStringSync(jsonEncode([]));
   }
 
-  String logFileContent = await logFile.readAsString();
+  String logFileContent = logFile.readAsStringSync();
   List<dynamic> logFileContentJson = jsonDecode(logFileContent);
   logFileContentJson.add(newData);
-  await logFile.writeAsString(jsonEncode(logFileContentJson));
+  logFile.writeAsStringSync(jsonEncode(logFileContentJson));
 }
 
-Future<void> cleanUpLogFiles() async {
+cleanUpLogFiles() async {
   String logFolder = await getLogFolder();
   // delete all logs older than 7 days
   //TODO: make this configurable

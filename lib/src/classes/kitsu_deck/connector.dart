@@ -66,8 +66,8 @@ class DeckWebsocket extends KitsuDeck {
           }
           _streamController.add(data);
           if (kDebugMode) {
-            // Print every event in debug mode
-            print("Received from websocket: $data");
+            // log every event in debug mode
+            log("Received from websocket: $data");
           }
 
           Map jsonData = jsonDecode(data);
@@ -75,9 +75,7 @@ class DeckWebsocket extends KitsuDeck {
           if (jsonData["event"] == "CLIENT_AUTH" &&
               jsonData["protected"] == true) {
             setIsSecured(true);
-            if (kDebugMode) {
-              print("Sending CLIENT_AUTH");
-            }
+            log("SENDING CLIENT_AUTH 🔑");
             send(jsonEncode({"event": "CLIENT_AUTH", "auth_pin": pin}));
           }
           if (jsonData["event"] == "CLIENT_AUTH" &&
@@ -91,14 +89,10 @@ class DeckWebsocket extends KitsuDeck {
                 .add(jsonEncode({"event": "GET_MACROS", "auth_pin": pin}));
             _webSocketChannel.sink.add(
                 jsonEncode({"event": "GET_MACRO_IMAGES", "auth_pin": pin}));
-            if (kDebugMode) {
-              print("Client auth success");
-            }
+            log("CLIENT AUTH SUCCESS ✔️");
           } else if (jsonData["event"] == "CLIENT_AUTH_FAILED") {
             disconnect();
-            if (kDebugMode) {
-              print("Client auth failed");
-            }
+            log("CLIENT AUTH FAILED ❌", LogType.error);
           }
 
           // handle Macro Invoked event
@@ -150,7 +144,6 @@ class DeckWebsocket extends KitsuDeck {
             });
           }
           if (jsonData["event"] == "GET_MACROS") {
-            print("GET_MACROS");
             if (jsonData["status"] == true) {
               List macros = [];
               for (var macro in jsonData["macros"]) {
@@ -164,9 +157,7 @@ class DeckWebsocket extends KitsuDeck {
 
           if (jsonData["event"] == "GET_MACRO_IMAGES") {
             setMacroImages(jsonData["images"]);
-            var result =
-                await fetchImage(hostname, pin, macroData, macroImages);
-            print("result: $result");
+            await fetchImage(hostname, pin, macroData, macroImages);
             notify();
           }
 
@@ -179,38 +170,32 @@ class DeckWebsocket extends KitsuDeck {
         },
         onError: (error) {
           if (kDebugMode) {
-            print('WebSocket error: $error');
+            log('WebSocket error: $error', LogType.error);
           }
           setIsConnected(false);
           _reconnect(url);
         },
         onDone: () {
           if (_breakConnection) {
-            if (kDebugMode) {
-              print("Intentional connection break");
-            }
+            log("Intentional connection break");
             _breakConnection = false;
             return;
           }
           if (_isConnected) {
-            if (kDebugMode) {
-              print('WebSocket closed unexpectedly... reconnecting');
-            }
+            log('WebSocket closed unexpectedly... reconnecting',
+                LogType.warning);
             setIsConnected(false);
             _reconnect(url);
           } else {
-            if (kDebugMode) {
-              print('WebSocket connection failed... reconnecting');
-            }
+            log('WebSocket connection failed... reconnecting', LogType.warning);
             _reconnect(url);
           }
         },
       );
     } catch (e) {
-      if (kDebugMode) {
-        setIsConnected(false);
-        print(e);
-      }
+      setIsConnected(false);
+      log('Error while connecting: $e', LogType.error);
+      _reconnect(url);
     }
   }
 
@@ -222,14 +207,12 @@ class DeckWebsocket extends KitsuDeck {
 
     // Schedule a reconnect attempt after a delay
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
-      if (kDebugMode) {
-        print('Attempting to reconnect...');
-      }
+      log('Attempting to reconnect...', LogType.warning);
       try {
         connect(url);
       } catch (e) {
         if (kDebugMode) {
-          print('Error while reconnecting: $e');
+          log('Error while reconnecting: $e', LogType.error);
         }
         _reconnect(url);
       }

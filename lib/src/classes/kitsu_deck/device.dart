@@ -44,7 +44,7 @@ class KitsuDeck extends ChangeNotifier {
     // init the log file
     await cleanUpLogFiles();
     _logFile = await createLogFile();
-    log("Cleaned up old log files");
+    log("CLEANED OLD LOG FILES 🧹");
 
     final sharedPref = SharedPref();
     final kitsuDeck = await sharedPref.getKitsuDeck();
@@ -107,19 +107,18 @@ class KitsuDeck extends ChangeNotifier {
   }
 
   // logging function
-  void log(String message, [LogType logType = LogType.info]) async {
+  void log(String message, [LogType logType = LogType.info]) {
     Map messageMap = {
       "time":
           "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}",
-      "message": message.toString(),
+      "message": message.toString().replaceAll("\n", "").replaceAll("\r", ""),
       "type": logType.toString().split(".")[1]
     };
-    await writeLogToFile(messageMap, _logFile);
-    // print the message to the console if in debug mode
+    writeLogToFile(messageMap, _logFile);
     if (kDebugMode) print(messageMap);
     // add the message to the log list
     logList.add(messageMap);
-    notifyListeners();
+    notify();
   }
 
   notify() {

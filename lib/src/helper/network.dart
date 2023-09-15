@@ -1,7 +1,9 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../../main.dart';
+import '../classes/kitsu_deck/device.dart';
 
 getCurrentIP() async {
   final interfaces = await NetworkInterface.list();
@@ -57,9 +59,9 @@ Future<List<Map>> getKitsuDeckHostname() async {
         ipList.add(result.host);
       }
     }).catchError((error) {
-      if (kDebugMode) {
-        print('Error occurred while looking up the host for IP $ip: $error');
-      }
+      kitsuDeck.log(
+          'Error occurred while looking up the host for IP $ip: $error',
+          LogType.warning);
     }));
   }
   await Future.wait(futures);
@@ -115,14 +117,11 @@ Future<bool> postMacroImage(
   final url = Uri.parse('http://$address/postMacroImage');
   try {
     final request = http.MultipartRequest('POST', url);
-    request.headers['Content-Type'] =
-        'multipart/form-data'; // Set the correct content-type
+    request.headers['Content-Type'] = 'multipart/form-data';
     request.files.add(image);
     request.fields.addAll({'auth_pin': pin});
-    // print all fields
     final response = await request.send();
     if (response.statusCode == 200) {
-      // TODO: check if the image was uploaded successfully
       return true;
     } else {
       return false;

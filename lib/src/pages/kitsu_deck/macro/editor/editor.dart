@@ -134,7 +134,6 @@ class MacroEditorModalState extends State<MacroEditorModal> {
     }
 
     if (event is RawKeyUpEvent) {
-      print(event.logicalKey.keyId);
       // don't record the key if it's a repeated event
       if (!isRepeat) {
         if (key.toLowerCase().contains("shift") ||
