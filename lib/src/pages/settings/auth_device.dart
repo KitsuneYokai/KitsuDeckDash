@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../classes/websocket/connector.dart';
+import '../../classes/kitsu_deck/connector.dart';
 import '../../helper/network.dart';
 
 class AuthKitsuDeck extends StatefulWidget {

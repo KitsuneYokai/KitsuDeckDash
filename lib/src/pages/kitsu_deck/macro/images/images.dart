@@ -11,7 +11,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:crop_image/crop_image.dart';
 import 'package:image/image.dart' as IMG;
 
-import '../../../../classes/websocket/connector.dart';
+import '../../../../classes/kitsu_deck/connector.dart';
 import '../../../../helper/network.dart';
 
 class MacroImagesModal extends StatefulWidget {

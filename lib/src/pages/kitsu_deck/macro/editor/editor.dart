@@ -7,7 +7,7 @@ import 'package:kitsu_deck_dash/src/pages/kitsu_deck/macro/images/images.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../../classes/websocket/connector.dart';
+import '../../../../classes/kitsu_deck/connector.dart';
 
 const List<String> macroActions = <String>["Macro"];
 

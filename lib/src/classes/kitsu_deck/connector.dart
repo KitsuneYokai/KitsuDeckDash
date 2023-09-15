@@ -6,10 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'package:keypress_simulator/keypress_simulator.dart';
-import 'package:keyboard_invoker/keyboard_invoker.dart';
 
 import '../../helper/macro/image.dart';
-import '../kitsu_deck/device.dart';
+import 'device.dart';
 
 class DeckWebsocket extends KitsuDeck {
   // DeckWebsocket websocket constructor

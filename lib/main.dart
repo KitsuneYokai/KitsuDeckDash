@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:kitsu_deck_dash/src/classes/websocket/connector.dart';
+import 'package:kitsu_deck_dash/src/classes/kitsu_deck/connector.dart';
 import 'package:provider/provider.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -99,6 +99,9 @@ void main() async {
   if (kitsuDeck.ip != null.toString()) {
     kitsuDeck.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
   }
+  // get the version of the app using the pubspec.yaml file
+  final version = await getVersion();
+  kitsuDeck.log("KitsuDeckDash V${version} started");
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider<DeckWebsocket>(
@@ -107,4 +110,15 @@ void main() async {
     ],
     child: const KitsuDeckDash(),
   ));
+}
+
+getVersion() {
+  final pubspecFile = File('pubspec.yaml');
+  final lines = pubspecFile.readAsLinesSync();
+  for (var line in lines) {
+    if (line.contains('version')) {
+      return line.split(':')[1].trim();
+    }
+  }
+  return null;
 }

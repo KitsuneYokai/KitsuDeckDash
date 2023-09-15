@@ -17,7 +17,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_localizations:
     sdk: flutter
-  http: ^0.13.5
+  http: ^1.1.0
   keypress_simulator: ^0.1.0
   provider: ^6.0.5
   shared_preferences: ^2.2.1
@@ -26,6 +26,8 @@ dependencies:
   window_manager: ^0.3.6
   keyboard_invoker:
    git: https://github.com/KitsuneYokai/keyboard_invoker
+  path_provider: ^2.1.1
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
