@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -65,10 +64,8 @@ class DeckWebsocket extends KitsuDeck {
             _url = url;
           }
           _streamController.add(data);
-          if (kDebugMode) {
-            // log every event in debug mode
-            log("Received from websocket: $data");
-          }
+
+          log("Received from websocket: $data");
 
           Map jsonData = jsonDecode(data);
           // if the deck is secured by a pin send the pin
@@ -169,9 +166,7 @@ class DeckWebsocket extends KitsuDeck {
           // Handle the events
         },
         onError: (error) {
-          if (kDebugMode) {
-            log('WebSocket error: $error', LogType.error);
-          }
+          log('WebSocket error: $error', LogType.error);
           setIsConnected(false);
           _reconnect(url);
         },
@@ -211,9 +206,7 @@ class DeckWebsocket extends KitsuDeck {
       try {
         connect(url);
       } catch (e) {
-        if (kDebugMode) {
-          log('Error while reconnecting: $e', LogType.error);
-        }
+        log('Error while reconnecting: $e', LogType.error);
         _reconnect(url);
       }
     });

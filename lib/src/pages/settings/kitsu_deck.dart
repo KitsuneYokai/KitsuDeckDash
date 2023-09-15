@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:kitsu_deck_dash/src/classes/kitsu_deck/connector.dart';
 import 'package:provider/provider.dart';
 
 import 'auth_device.dart';
 import 'no_device.dart';
+
+import '../../classes/kitsu_deck/connector.dart';
 
 class KitsuDeckSettings extends StatefulWidget {
   const KitsuDeckSettings({

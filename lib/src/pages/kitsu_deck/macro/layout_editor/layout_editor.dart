@@ -3,9 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kitsu_deck_dash/src/classes/kitsu_deck/connector.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../../../../classes/kitsu_deck/connector.dart';
 
 class MacroLayoutEditor extends StatefulWidget {
   const MacroLayoutEditor({super.key});

@@ -188,7 +188,7 @@ class LogMessage extends StatelessWidget {
                       color: Colors.white,
                       size: 15,
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 3),
                     Text(log["time"])
                   ],
                 )),

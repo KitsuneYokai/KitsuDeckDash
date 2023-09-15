@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:kitsu_deck_dash/src/helper/network.dart';
+import '../network.dart';
 import 'package:image/image.dart' as IMG;
 
 Future<void> fetchMacroData(sink, websocketPin) async {

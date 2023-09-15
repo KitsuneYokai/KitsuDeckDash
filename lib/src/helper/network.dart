@@ -61,7 +61,7 @@ Future<List<Map>> getKitsuDeckHostname() async {
     }).catchError((error) {
       kitsuDeck.log(
           'Error occurred while looking up the host for IP $ip: $error',
-          LogType.warning);
+          LogType.info);
     }));
   }
   await Future.wait(futures);

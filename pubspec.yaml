@@ -9,6 +9,7 @@ version: 1.0.0+1
 environment:
   sdk: ">=2.18.6 <3.0.0"
 
+
 dependencies:
   crop_image: ^1.0.11
   file_picker: ^5.2.5

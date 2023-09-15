@@ -108,15 +108,15 @@ class KitsuDeck extends ChangeNotifier {
 
   // logging function
   void log(String message, [LogType logType = LogType.info]) {
+    DateTime dateTime = DateTime.now();
     Map messageMap = {
       "time":
-          "${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}",
+          "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}",
       "message": message.toString().replaceAll("\n", "").replaceAll("\r", ""),
       "type": logType.toString().split(".")[1]
     };
     writeLogToFile(messageMap, _logFile);
     if (kDebugMode) print(messageMap);
-    // add the message to the log list
     logList.add(messageMap);
     notify();
   }

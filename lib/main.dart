@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:kitsu_deck_dash/src/classes/kitsu_deck/connector.dart';
+import './src/classes/kitsu_deck/connector.dart';
 import 'package:provider/provider.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,8 +31,7 @@ void main() async {
   if (kitsuDeck.ip != null.toString()) {
     kitsuDeck.initConnection("ws://${kitsuDeck.ip}/ws", kitsuDeck.pin);
   }
-  final version = await getVersion();
-  kitsuDeck.log("KitsuDeckDash Version: ${version}");
+  kitsuDeck.log("KitsuDeckDash Started");
   // initialize the system tray
   final AppWindow appWindow = AppWindow();
   final SystemTray systemTray = SystemTray();
@@ -41,7 +40,7 @@ void main() async {
   Future<void> initSystemTray() async {
     // We first init the sys tray menu and then add the menu entries
     await systemTray.initSystemTray(iconPath: getTrayImagePath('app_icon'));
-    systemTray.setTitle("DeckDash");
+    systemTray.setTitle("KitsuDeckDash");
     systemTray.setToolTip("KitsuDeckDash");
 
     // handle system tray event
@@ -88,7 +87,7 @@ void main() async {
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
-    title: 'DeckDash',
+    title: 'KitsuDeckDash',
     size: Size(900, 600),
     minimumSize: Size(900, 600),
     center: true,
@@ -109,15 +108,4 @@ void main() async {
     ],
     child: const KitsuDeckDash(),
   ));
-}
-
-getVersion() {
-  final pubspecFile = File('pubspec.yaml');
-  final lines = pubspecFile.readAsLinesSync();
-  for (var line in lines) {
-    if (line.contains('version')) {
-      return line.split(':')[1].trim();
-    }
-  }
-  return null;
 }

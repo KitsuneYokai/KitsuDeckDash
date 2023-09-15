@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:kitsu_deck_dash/src/helper/folder.dart';
+import './folder.dart';
 import 'package:path/path.dart';
 
 Future<String> createLogFile() async {
+  DateTime now = DateTime.now();
   String logDir = await createOrReturnFolderInAppDocDir(
-      "KitsuDeckDash/Log/${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}");
+      "KitsuDeckDash/Log/${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}");
   String logFileName =
-      "$logDir/${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}.json";
+      "$logDir/${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}.json";
   File(logFileName).create(recursive: true);
 
   return logFileName;
