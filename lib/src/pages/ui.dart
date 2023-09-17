@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import './kitsu_deck/index.dart';
-import './settings/navbar.dart';
+import 'settings/index.dart';
 
 class MainView extends StatefulWidget {
   const MainView({

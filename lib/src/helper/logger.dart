@@ -6,7 +6,7 @@ import 'package:path/path.dart';
 Future<String> createLogFile() async {
   DateTime now = DateTime.now();
   String logDir = await createOrReturnFolderInAppDocDir(
-      "KitsuDeckDash/Log/${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}");
+      "$kitsuDeckLogDir${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}");
   String logFileName =
       "$logDir/${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}.json";
   File(logFileName).create(recursive: true);
@@ -25,7 +25,9 @@ writeLogToFile(dynamic newData, String logFilePath) {
   String logFileContent = logFile.readAsStringSync();
   List<dynamic> logFileContentJson = jsonDecode(logFileContent);
   logFileContentJson.add(newData);
-  logFile.writeAsStringSync(jsonEncode(logFileContentJson));
+  JsonEncoder encoder = const JsonEncoder.withIndent('    ');
+  String jsonString = encoder.convert(logFileContentJson);
+  logFile.writeAsStringSync(jsonString);
 }
 
 cleanUpLogFiles() async {

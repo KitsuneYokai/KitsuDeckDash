@@ -17,6 +17,7 @@ class DebugSettings extends StatefulWidget {
 class DebugSettingsState extends State<DebugSettings> {
   int selectedIndex = 0;
   final logController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final kitsuDeck = Provider.of<DeckWebsocket>(context);
@@ -24,7 +25,7 @@ class DebugSettingsState extends State<DebugSettings> {
       logController.animateTo(
         logController.position.maxScrollExtent + 75,
         duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
+        curve: Curves.easeInOutCirc,
       );
     }
     return Expanded(

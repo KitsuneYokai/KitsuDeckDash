@@ -29,6 +29,7 @@ dependencies:
    git: https://github.com/KitsuneYokai/keyboard_invoker
   path_provider: ^2.1.1
   path: ^1.8.3
+  flutter_svg: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +49,8 @@ flutter:
     - assets/images/macro_icon.jpg
     - assets/images/app_icon.png
     - assets/images/app_icon.ico
+    # define the font awesome icons.json file
+    - assets/font-awesome-icons.json
 
 flutter_icons:
   windows:
