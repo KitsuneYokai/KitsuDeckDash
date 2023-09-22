@@ -285,7 +285,8 @@ class MacroInfoModalState extends State<MacroInfoModal> {
                     ),
                     onPressed: null,
                     child: Text(
-                      jsonDecode(macroData["action"])["action"][index]["key"],
+                      jsonDecode(macroData["action"])["action"][index]
+                          ["keyLabel"],
                       style: const TextStyle(fontSize: 20),
                     ),
                   ),

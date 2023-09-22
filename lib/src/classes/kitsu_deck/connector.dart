@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'package:keypress_simulator/keypress_simulator.dart';
+import 'package:keyboard_invoker/keyboard_invoker.dart';
 
 import '../../helper/macro/image.dart';
 import 'device.dart';
@@ -93,52 +92,18 @@ class DeckWebsocket extends KitsuDeck {
           }
 
           // handle Macro Invoked event
-          // TODO: Use own macro invoker package(keyboard_invoker), cause the one im using now dose not support linux
           if (jsonData["event"] == "MACRO_INVOKED") {
             Map jsonAction = jsonDecode(jsonData["action"]);
-            Future.delayed(const Duration(milliseconds: 50), () async {
-              if (!await keyPressSimulator.isAccessAllowed()) {
-                await keyPressSimulator.requestAccess();
+            var keyboardInvoker = KeyboardInvoker();
+            for (var key in jsonAction["action"]) {
+              if (key["event"] == KeyType.keyDown.toString()) {
+                keyboardInvoker.holdKey(key["code"]);
+              } else if (key["event"] == KeyType.keyUp.toString()) {
+                keyboardInvoker.releaseKey(key["code"]);
+              } else if (key["event"] == KeyType.keyInvoke.toString()) {
+                keyboardInvoker.invokeKey(key["code"]);
               }
-
-              for (var key in jsonAction["action"]) {
-                if (key["code"] != null) {
-                  if (key["key"].toString().toLowerCase().contains("meta") ||
-                      key["key"].toString().toLowerCase().contains("ctrl") ||
-                      key["key"].toString().toLowerCase().contains("alt") ||
-                      key["key"].toString().toLowerCase().contains("shift")) {
-                    continue;
-                  } else {
-                    var keyCode =
-                        LogicalKeyboardKey.findKeyByKeyId(key["code"]);
-                    if (keyCode != null) {
-                      bool isShift = key["shift"];
-                      bool isAlt = key["alt"];
-                      bool isCtrl = key["ctrl"];
-                      bool isMeta = key["meta"];
-
-                      List<ModifierKey> modifiers = [];
-
-                      if (isShift) {
-                        modifiers.add(ModifierKey.shiftModifier);
-                      }
-                      if (isAlt) {
-                        modifiers.add(ModifierKey.altModifier);
-                      }
-                      if (isCtrl) {
-                        modifiers.add(ModifierKey.controlModifier);
-                      }
-                      if (isMeta) {
-                        modifiers.add(ModifierKey.metaModifier);
-                      }
-
-                      await keyPressSimulator.simulateKeyPress(
-                          key: keyCode, modifiers: modifiers, keyDown: true);
-                    }
-                  }
-                }
-              }
-            });
+            }
           }
           if (jsonData["event"] == "GET_MACROS") {
             if (jsonData["status"] == true) {

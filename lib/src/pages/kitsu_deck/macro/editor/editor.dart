@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:keyboard_invoker/keyboard_invoker.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -55,7 +56,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
       macroDescriptionController.text = widget.macroDescription!;
     }
     if (widget.macroRecording != null) {
-      macroRecording = widget.macroRecording!;
+      _recordedKeys = widget.macroRecording!;
     }
     if (widget.macroType != null) {
       macroAction = widget.macroType!;
@@ -70,90 +71,77 @@ class MacroEditorModalState extends State<MacroEditorModal> {
 
   Map _imageReturn = {};
   int macroActionsValue = 0;
-  bool isMacroRecording = false;
-  List macroRecording = [];
+  List _recordedKeys = [];
+  bool _isRecording = false;
 
   TextEditingController macroNameController = TextEditingController();
   TextEditingController macroDescriptionController = TextEditingController();
-  void _handleKeyDownEvent(RawKeyEvent event) {
-    // define some variables to build the json object
-    String key = event.logicalKey.keyLabel;
+  // simple macro recording function
+  recordKeys(RawKeyEvent event) {
+    String keyLabel = event.logicalKey.keyLabel;
     int keyCode = event.logicalKey.keyId;
-
-    bool isShiftPressed = event.isShiftPressed;
-    bool isAltPressed = event.isAltPressed;
-    bool isControlPressed = event.isControlPressed;
-    bool isMetaPressed = event.isMetaPressed;
 
     bool isRepeat = event.repeat;
 
-    Map macroMap = {
-      "key": null,
+    Map<String, dynamic> macroMap = {
+      "keyLabel": null,
       "code": null,
-      "shift": null,
-      "ctrl": null,
-      "alt": null,
-      "meta": null
+      "event": null,
     };
 
-    if (isShiftPressed) {
-      key = key.toUpperCase();
-    } else {
-      key = key.toLowerCase();
-    }
-
-    if (key == " ") {
-      key = "SPACE";
-    }
-    // if shift, ctrl, alt or meta is pressed, add it to the array, don't record keys,
-    // keys are recorded using the Raw key up event, this is to avoid recording the key twice,
-    // and have an identifier for the modifier keys (e.g. shift down H E L L O shift up SPACE w h a t s u p)
-
-    if (event is RawKeyDownEvent) {
-      // don't record the key if it's a repeated event
-      if (!isRepeat) {
-        // only record the key if its a modifier key
-        if (key.toLowerCase().contains("shift") ||
-            key.toLowerCase().contains("ctrl") ||
-            key.toLowerCase().contains("alt") ||
-            key.toLowerCase().contains("meta")) {
-          key += " down";
-
-          macroMap["key"] = key;
+    // don't record the key if it's a repeated event
+    if (!isRepeat) {
+      // only record the modifier keys on a key down event
+      if (event is RawKeyDownEvent) {
+        if (keyLabel.toLowerCase().contains("shift") ||
+            keyLabel.toLowerCase().contains("control") ||
+            keyLabel.toLowerCase().contains("alt") ||
+            keyLabel.toLowerCase().contains("meta")) {
+          macroMap["keyLabel"] = keyLabel;
           macroMap["code"] = keyCode;
-          macroMap["shift"] = isShiftPressed;
-          macroMap["ctrl"] = isControlPressed;
-          macroMap["alt"] = isAltPressed;
-          macroMap["meta"] = isMetaPressed;
+          macroMap["event"] = KeyType.keyDown.toString();
 
           setState(() {
-            macroRecording = [...macroRecording, macroMap];
+            _recordedKeys = [..._recordedKeys, macroMap];
           });
         }
-      }
-    }
-
-    if (event is RawKeyUpEvent) {
-      // don't record the key if it's a repeated event
-      if (!isRepeat) {
-        if (key.toLowerCase().contains("shift") ||
-            key.toLowerCase().contains("ctrl") ||
-            key.toLowerCase().contains("alt") ||
-            key.toLowerCase().contains("meta")) {
-          key += " up";
-        }
-        macroMap["key"] = key;
+        // record the keys on a key up event, so they are not held down
+      } else if (event is RawKeyUpEvent) {
+        macroMap["keyLabel"] = keyLabel;
         macroMap["code"] = keyCode;
-        macroMap["shift"] = isShiftPressed;
-        macroMap["ctrl"] = isControlPressed;
-        macroMap["alt"] = isAltPressed;
-        macroMap["meta"] = isMetaPressed;
+        macroMap["event"] = KeyType.keyInvoke.toString();
+
+        if (keyLabel.toLowerCase().contains("shift") ||
+            keyLabel.toLowerCase().contains("ctrl") ||
+            keyLabel.toLowerCase().contains("alt") ||
+            keyLabel.toLowerCase().contains("meta")) {
+          macroMap["event"] = KeyType.keyUp.toString();
+        }
         // set the state
         setState(() {
-          macroRecording = [...macroRecording, macroMap];
+          _recordedKeys = [..._recordedKeys, macroMap];
         });
       }
     }
+  }
+
+  startRecording() {
+    // clear the recorded keys
+    setState(() {
+      _recordedKeys = [];
+      _isRecording = true;
+    });
+    // add the listener
+    RawKeyboard.instance.addListener(recordKeys);
+  }
+
+  stopRecording() {
+    // remove the listener
+    RawKeyboard.instance.removeListener(recordKeys);
+    // set the state
+    setState(() {
+      _isRecording = false;
+    });
   }
 
   @override
@@ -205,9 +193,8 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                       padding: const EdgeInsets.all(10),
                       child: TextButton(
                         onPressed: () async {
-                          if (isMacroRecording) {
-                            RawKeyboard.instance
-                                .removeListener(_handleKeyDownEvent);
+                          if (_isRecording) {
+                            stopRecording();
                           }
                           Navigator.of(context).pop(false);
                         },
@@ -345,28 +332,22 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                             children: [
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isMacroRecording
+                                  backgroundColor: _isRecording
                                       ? Colors.white70
                                       : Colors.white,
                                 ),
                                 child: Icon(
-                                  isMacroRecording ? Icons.stop : Icons.circle,
-                                  color: isMacroRecording
-                                      ? Colors.red
-                                      : Colors.green,
-                                  size: isMacroRecording ? 20 : 15,
+                                  _isRecording ? Icons.stop : Icons.circle,
+                                  color:
+                                      _isRecording ? Colors.red : Colors.green,
+                                  size: _isRecording ? 20 : 15,
                                 ),
                                 onPressed: () async {
-                                  if (isMacroRecording) {
-                                    RawKeyboard.instance
-                                        .removeListener(_handleKeyDownEvent);
+                                  if (_isRecording) {
+                                    stopRecording();
                                   } else {
-                                    RawKeyboard.instance
-                                        .addListener(_handleKeyDownEvent);
+                                    startRecording();
                                   }
-                                  setState(() {
-                                    isMacroRecording = !isMacroRecording;
-                                  });
                                 },
                               ),
                               const SizedBox(width: 10),
@@ -387,7 +368,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                     ),
                                     onPressed: () async {
                                       setState(() {
-                                        macroRecording = [];
+                                        _recordedKeys = [];
                                       });
                                     },
                                   );
@@ -395,7 +376,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                 onAccept: (int? acceptedIndex) {
                                   if (acceptedIndex != null) {
                                     setState(() {
-                                      macroRecording.removeAt(acceptedIndex);
+                                      _recordedKeys.removeAt(acceptedIndex);
                                     });
                                   }
                                 },
@@ -405,7 +386,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                               ),
                             ],
                           ),
-                          if (macroRecording.isNotEmpty) ...[
+                          if (_recordedKeys.isNotEmpty) ...[
                             const SizedBox(height: 10),
                             Expanded(
                               child: SingleChildScrollView(
@@ -413,7 +394,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                   clipBehavior: Clip.antiAlias,
                                   children: [
                                     for (var index = 0;
-                                        index < macroRecording.length;
+                                        index < _recordedKeys.length;
                                         index++)
                                       Draggable(
                                         data: index,
@@ -426,7 +407,8 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                               ),
                                               onPressed: null,
                                               child: Text(
-                                                macroRecording[index]["key"],
+                                                _recordedKeys[index]
+                                                    ["keyLabel"],
                                                 style: const TextStyle(
                                                     fontSize: 20),
                                               ),
@@ -448,7 +430,8 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                                       Colors.white70,
                                                 ),
                                                 child: Text(
-                                                  macroRecording[index]["key"],
+                                                  _recordedKeys[index]
+                                                      ["keyLabel"],
                                                   style: const TextStyle(
                                                       fontSize: 20),
                                                 ),
@@ -459,11 +442,11 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                               if (acceptedIndex != null) {
                                                 setState(() {
                                                   final draggedItem =
-                                                      macroRecording[
+                                                      _recordedKeys[
                                                           acceptedIndex];
-                                                  macroRecording
+                                                  _recordedKeys
                                                       .removeAt(acceptedIndex);
-                                                  macroRecording.insert(
+                                                  _recordedKeys.insert(
                                                       index, draggedItem);
                                                 });
                                               }
@@ -495,7 +478,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                                     macroNameController.text,
                                                     macroDescriptionController
                                                         .text,
-                                                    macroRecording,
+                                                    _recordedKeys,
                                                     _imageReturn,
                                                     isEditingMode,
                                                     widget.macroId,
@@ -523,13 +506,9 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                         ),
                                         onPressed: () async {
                                           // remove the listener for the macro recording
-                                          RawKeyboard.instance.removeListener(
-                                              _handleKeyDownEvent);
-                                          setState(() {
-                                            isMacroRecording = false;
-                                          });
+                                          stopRecording();
                                           // check if the macro is empty
-                                          if (macroRecording.isEmpty) {
+                                          if (_recordedKeys.isEmpty) {
                                             const snackBar = SnackBar(
                                               content:
                                                   Text("Please record a macro"),
@@ -549,7 +528,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(snackBar);
                                           }
-                                          if (macroRecording.isNotEmpty &&
+                                          if (_recordedKeys.isNotEmpty &&
                                               macroNameController
                                                   .text.isNotEmpty) {
                                             // save the macro
@@ -559,7 +538,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                               macroActionsValue,
                                               macroNameController.text,
                                               macroDescriptionController.text,
-                                              macroRecording,
+                                              _recordedKeys,
                                               _imageReturn,
                                               isEditingMode,
                                               widget.macroId,
@@ -600,13 +579,10 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                         ),
                                         onPressed: () async {
                                           // remove the listener for the macro recording
-                                          RawKeyboard.instance.removeListener(
-                                              _handleKeyDownEvent);
-                                          setState(() {
-                                            isMacroRecording = false;
-                                          });
+                                          stopRecording();
+
                                           // check if the macro is empty
-                                          if (macroRecording.isEmpty) {
+                                          if (_recordedKeys.isEmpty) {
                                             const snackBar = SnackBar(
                                               content:
                                                   Text("Please record a macro"),
@@ -626,7 +602,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(snackBar);
                                           }
-                                          if (macroRecording.isNotEmpty &&
+                                          if (_recordedKeys.isNotEmpty &&
                                               macroNameController
                                                   .text.isNotEmpty) {
                                             // save the macro
@@ -636,7 +612,7 @@ class MacroEditorModalState extends State<MacroEditorModal> {
                                               macroActionsValue,
                                               macroNameController.text,
                                               macroDescriptionController.text,
-                                              macroRecording,
+                                              _recordedKeys,
                                               _imageReturn,
                                               isEditingMode,
                                             );
@@ -842,7 +818,7 @@ class MacroEditorConfirmModalState extends State<MacroEditorConfirmModal> {
                   ),
                   onPressed: null,
                   child: Text(
-                    widget.macroRecording[index]["key"],
+                    widget.macroRecording[index]["keyLabel"],
                     style: const TextStyle(fontSize: 20),
                   ),
                 ),

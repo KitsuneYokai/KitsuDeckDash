@@ -2,17 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../network.dart';
-import 'package:image/image.dart' as IMG;
+// ignore: depend_on_referenced_packages
+import 'package:image/image.dart' as img;
 
 Future<void> fetchMacroData(sink, websocketPin) async {
   sink.add(jsonEncode({"event": "GET_MACROS", "auth_pin": websocketPin}));
   sink.add(jsonEncode({"event": "GET_MACRO_IMAGES", "auth_pin": websocketPin}));
 }
 
-Future combineData(macroData, ImageData) async {
+Future combineData(macroData, imageData) async {
   // create the image_widget json object for each macro
   for (var macro in macroData) {
-    for (var image in ImageData) {
+    for (var image in imageData) {
       if (macro["image"] == image["id"]) {
         macro["image_widget"] = image["image"];
       }
@@ -41,9 +42,9 @@ Future fetchImage(ip, pin, kitsuDeckMacroData, kitsuDeckMacroImages) async {
     // make a image with rounded corners
     if (imageData == null || imageData == false) {
       // create a empty image
-      imageData = IMG.Image(width: 100, height: 100);
-      IMG.fill(imageData, color: IMG.ColorInt16(0x000000));
-      imageData = IMG.encodeJpg(imageData);
+      imageData = img.Image(width: 100, height: 100);
+      img.fill(imageData, color: img.ColorInt16(0x000000));
+      imageData = img.encodeJpg(imageData);
     }
     imageData = ClipRRect(
       borderRadius: BorderRadius.circular(10.0),

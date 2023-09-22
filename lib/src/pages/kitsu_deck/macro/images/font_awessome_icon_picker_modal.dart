@@ -23,7 +23,7 @@ class FontAwesomeIconPickerModalState
     // Todo: make it load in chunks so it doesn't take so long to load (2025 images takes around 20 sek on RyZen 5800x3d)
     convertSVGPathToImage(String rawSvgPath, width, height) async {
       final PictureInfo pictureInfo =
-          await vg.loadPicture(SvgStringLoader(rawSvgPath), context);
+          await vg.loadPicture(SvgStringLoader(rawSvgPath), null);
       // look what number is the highest in width and height and use that number for the image size and align the image in the middle
       if (width > height) {
         height = width;
