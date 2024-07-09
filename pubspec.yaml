@@ -24,11 +24,10 @@ dependencies:
   system_tray: ^2.0.2
   web_socket_channel: ^2.3.0
   window_manager: ^0.3.6
-  keyboard_invoker:
-   git: https://github.com/KitsuneYokai/keyboard_invoker
   path_provider: ^2.1.1
   path: ^1.8.3
   flutter_svg: ^2.0.7
+  keyboard_invoker: ^1.0.0
 
 dev_dependencies:
   flutter_test:

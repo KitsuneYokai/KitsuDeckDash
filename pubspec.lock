@@ -232,12 +232,11 @@ packages:
   keyboard_invoker:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "8892932480950699a784b9a5d0b1affc2c58e1b5"
-      url: "https://github.com/KitsuneYokai/keyboard_invoker"
-    source: git
-    version: "0.0.1"
+      name: keyboard_invoker
+      sha256: "4298fbf64dad9d1dd244eb2c2a6b5edd1fc5321efa7949c4ae862d1432ebc89c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   lints:
     dependency: transitive
     description:
